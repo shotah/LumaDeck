@@ -47,6 +47,29 @@ project adheres to [Semantic Versioning](https://semver.org/).
   example on ESPHome 2026.4.0. Confirms `!extend page-id`, the
   `qspi_dbi`/RM67162 driver, the `cst816` touch platform, and every
   widget's LVGL syntax all work end-to-end.
+* New `examples/lilygo-test-rig.yaml` includes every LumaDeck widget
+  on a single device (visually it's a mess, but every widget's YAML
+  is verified to parse against ESPHome's LVGL schema).
+
+### Widget upgrades
+
+* `widgets/analog_clock.yaml` → v0.2.0. Hand rotation now actually
+  works: rectangular hands rotated each second via `transform_angle`
+  (0.1° units) around `transform_pivot_y` at the face center,
+  driven by `id(ha_time).now()`.
+* `widgets/album_art.yaml` → v0.2.0. Pulls the current
+  `${ha_media_player}.entity_picture` from Home Assistant via
+  `online_image` + `http_request`, prepending `${ha_url}` for
+  relative paths. Updates the LVGL `image:` widget on every track
+  change.
+* `widgets/media_card.yaml` → v0.2.0. Added a horizontal LVGL
+  `slider:` bound to `media_player.volume_set` and a mute toggle
+  whose color tracks the HA `is_volume_muted` attribute via a
+  `binary_sensor`.
+* `widgets/notification_toast.yaml` → v0.2.0. Slide-in / slide-out
+  is now animated via a `repeat:` loop computing the y position per
+  step (8 × 25 ms ≈ 200 ms each way; all timings tunable via
+  `${toast_anim_steps}` / `${toast_step_ms}`).
 
 ### Known limitations
 

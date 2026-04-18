@@ -1,16 +1,27 @@
 # ---------------------------------------------------------------
 # widget: notification_toast
-# version: 0.1.0
-# reads:        ${bg_alt} ${fg} ${accent} ${border} ${anim_time} ${font_sm}
+# version: 0.2.0
+# reads:        ${bg_alt} ${fg} ${accent} ${border} ${border_w}
+#               ${radius_pill} ${pad_sm} ${font_sm}
 # targets:      top_layer (overlay across all pages)
 # exposes:      lum_toast_root lum_toast_label
 # ha_entities:  none
 # ha_services:  none
 # api:          script.execute lum_toast_show with parameter `msg`
+#
+# ESPHome's `lvgl.widget.update y:` snaps the position instantly --
+# there's no built-in y-position animator. We approximate a smooth
+# slide by running a `repeat:` loop that updates y in ~10px steps
+# every 25 ms, giving a perceptibly smooth ~200 ms animation in each
+# direction. Tunable via the substitutions below.
 # ---------------------------------------------------------------
 
 substitutions:
   toast_duration_ms: "2500"
+  toast_anim_steps:  "8"
+  toast_step_ms:     "25"
+  toast_y_hidden:    "-64"
+  toast_y_visible:   "16"
 
 lvgl:
   top_layer:
@@ -18,7 +29,7 @@ lvgl:
       - obj:
           id: lum_toast_root
           align: TOP_MID
-          y: -64
+          y: ${toast_y_hidden}
           width: 280
           height: 44
           bg_color: ${bg_alt}
@@ -46,13 +57,38 @@ script:
       - lvgl.label.update:
           id: lum_toast_label
           text: !lambda 'return msg;'
+      - lvgl.widget.update:
+          id: lum_toast_root
+          y: ${toast_y_hidden}
       - lvgl.widget.show: lum_toast_root
-      - lvgl.widget.update:
-          id: lum_toast_root
-          y: 16
+
+      # Slide in: y goes from `${toast_y_hidden}` to `${toast_y_visible}`
+      # in ${toast_anim_steps} equal increments.
+      - repeat:
+          count: ${toast_anim_steps}
+          then:
+            - lvgl.widget.update:
+                id: lum_toast_root
+                y: !lambda |-
+                  const int y_from = ${toast_y_hidden};
+                  const int y_to   = ${toast_y_visible};
+                  const int steps  = ${toast_anim_steps};
+                  return y_from + ((y_to - y_from) * (int)(iteration + 1)) / steps;
+            - delay: ${toast_step_ms}ms
+
       - delay: ${toast_duration_ms}ms
-      - lvgl.widget.update:
-          id: lum_toast_root
-          y: -64
-      - delay: ${anim_time}ms
+
+      # Slide out: reverse of slide-in.
+      - repeat:
+          count: ${toast_anim_steps}
+          then:
+            - lvgl.widget.update:
+                id: lum_toast_root
+                y: !lambda |-
+                  const int y_from = ${toast_y_visible};
+                  const int y_to   = ${toast_y_hidden};
+                  const int steps  = ${toast_anim_steps};
+                  return y_from + ((y_to - y_from) * (int)(iteration + 1)) / steps;
+            - delay: ${toast_step_ms}ms
+
       - lvgl.widget.hide: lum_toast_root

@@ -1,12 +1,18 @@
 # ---------------------------------------------------------------
 # widget: media_card
-# version: 0.1.0
-# reads:        ${bg_alt} ${fg} ${fg_muted} ${accent} ${font_md} ${font_sm}
+# version: 0.2.0
+# reads:        ${bg_alt} ${bg} ${fg} ${fg_muted} ${accent} ${success}
+#               ${border} ${border_w} ${radius_lg} ${radius_md}
+#               ${font_md} ${font_sm} ${pad_md}
 # targets:      media_page
 # exposes:      lum_media_root lum_media_title lum_media_artist
 #               lum_media_btn_prev lum_media_btn_play lum_media_btn_next
+#               lum_media_btn_mute lum_media_vol
+#               lum_media_title_src lum_media_artist_src
+#               lum_media_volume_src lum_media_muted_src
 # ha_entities:  ${ha_media_player}
-# ha_services:  media_player.media_play_pause/next_track/previous_track
+# ha_services:  media_player.media_play_pause / media_next_track /
+#               media_previous_track / volume_set / volume_mute
 # requires:     packages/ha.yaml
 # ---------------------------------------------------------------
 
@@ -29,6 +35,34 @@ text_sensor:
           id: lum_media_artist
           text: !lambda 'return x.c_str();'
 
+sensor:
+  - platform: homeassistant
+    id: lum_media_volume_src
+    entity_id: ${ha_media_player}
+    attribute: volume_level
+    on_value:
+      - lvgl.slider.update:
+          id: lum_media_vol
+          value: !lambda 'return (int)(x * 100);'
+
+binary_sensor:
+  - platform: homeassistant
+    id: lum_media_muted_src
+    entity_id: ${ha_media_player}
+    attribute: is_volume_muted
+    on_state:
+      - if:
+          condition:
+            lambda: 'return x;'
+          then:
+            - lvgl.widget.update:
+                id: lum_media_btn_mute
+                bg_color: ${accent}
+          else:
+            - lvgl.widget.update:
+                id: lum_media_btn_mute
+                bg_color: ${bg}
+
 lvgl:
   pages:
     - id: !extend media_page
@@ -37,7 +71,7 @@ lvgl:
             id: lum_media_root
             align: CENTER
             width: 280
-            height: 200
+            height: 250
             bg_color: ${bg_alt}
             border_color: ${border}
             border_width: ${border_w}
@@ -61,6 +95,7 @@ lvgl:
                   text_color: ${fg_muted}
                   text_font: font_sm
                   text: ""
+              # Transport controls.
               - obj:
                   width: 240
                   height: 56
@@ -114,3 +149,58 @@ lvgl:
                               text_color: ${fg}
                               text_font: font_md
                               text: ">>"
+              # Volume row: mute toggle + horizontal slider.
+              - obj:
+                  width: 240
+                  height: 36
+                  bg_opa: TRANSP
+                  border_width: 0
+                  layout:
+                    type: FLEX
+                    flex_flow: ROW
+                    flex_align_main: SPACE_BETWEEN
+                    flex_align_cross: CENTER
+                  widgets:
+                    - button:
+                        id: lum_media_btn_mute
+                        width: 44
+                        height: 32
+                        bg_color: ${bg}
+                        radius: ${radius_md}
+                        on_click:
+                          - homeassistant.service:
+                              service: media_player.volume_mute
+                              data:
+                                entity_id: ${ha_media_player}
+                              data_template:
+                                is_volume_muted: !lambda |-
+                                  return id(lum_media_muted_src).state ? "false" : "true";
+                        widgets:
+                          - label:
+                              align: CENTER
+                              text_color: ${fg}
+                              text_font: font_sm
+                              text: "M"
+                    - slider:
+                        id: lum_media_vol
+                        width: 180
+                        height: 16
+                        min_value: 0
+                        max_value: 100
+                        value: 50
+                        indicator:
+                          bg_color: ${accent}
+                        knob:
+                          bg_color: ${accent}
+                          radius: ${radius_pill}
+                          pad_all: 4
+                        on_value:
+                          - homeassistant.service:
+                              service: media_player.volume_set
+                              data:
+                                entity_id: ${ha_media_player}
+                              data_template:
+                                volume_level: !lambda |-
+                                  char buf[8];
+                                  snprintf(buf, sizeof(buf), "%.2f", x / 100.0f);
+                                  return std::string(buf);

@@ -39,6 +39,7 @@
         "ruamel",
         "setuptools",
         "shutil",
+        "stabilise",
         "strftime",
         "throughs",
         "Vbat",

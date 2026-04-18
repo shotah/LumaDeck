@@ -1,17 +1,27 @@
 # ---------------------------------------------------------------
 # widget: analog_clock
-# version: 0.1.0
-# reads:        ${bg} ${fg} ${accent} ${accent_alt} ${border}
+# version: 0.2.0
+# reads:        ${bg_alt} ${fg} ${accent} ${border} ${border_w}
 # targets:      home_page
 # exposes:      lum_analog_face lum_analog_hour lum_analog_min lum_analog_sec
 # ha_entities:  ha_time
 # ha_services:  none
 # config:       ${analog_size:-220} ${analog_show_seconds:-true}
+#
+# Hands are vertical rectangles anchored at face center via
+# `align: BOTTOM_MID` and rotated each second around their bottom
+# edge using `transform_angle` (LVGL uses 0.1-degree units, so a
+# value of 900 = 90 degrees).
 # ---------------------------------------------------------------
 
 substitutions:
   analog_size:          "220"
   analog_show_seconds:  "true"
+
+  # Hand lengths (px). Tweak in a consumer device YAML to taste.
+  analog_hour_len:      "50"
+  analog_min_len:       "70"
+  analog_sec_len:       "80"
 
 lvgl:
   pages:
@@ -26,31 +36,46 @@ lvgl:
             bg_color: ${bg_alt}
             border_color: ${border}
             border_width: ${border_w}
+            pad_all: 0
             widgets:
-              - line:
+              # Hour hand. Anchored bottom-center at the face center
+              # so the bottom edge IS the rotation pivot.
+              - obj:
                   id: lum_analog_hour
-                  points:
-                    - [110, 110]
-                    - [110, 50]
-                  line_color: ${fg}
-                  line_width: 6
-                  line_rounded: true
-              - line:
+                  align: CENTER
+                  y: -${analog_hour_len}
+                  width: 6
+                  height: ${analog_hour_len}
+                  bg_color: ${fg}
+                  bg_opa: COVER
+                  border_width: 0
+                  radius: 3
+                  transform_pivot_x: 3
+                  transform_pivot_y: ${analog_hour_len}
+              - obj:
                   id: lum_analog_min
-                  points:
-                    - [110, 110]
-                    - [110, 30]
-                  line_color: ${fg}
-                  line_width: 4
-                  line_rounded: true
-              - line:
+                  align: CENTER
+                  y: -${analog_min_len}
+                  width: 4
+                  height: ${analog_min_len}
+                  bg_color: ${fg}
+                  bg_opa: COVER
+                  border_width: 0
+                  radius: 2
+                  transform_pivot_x: 2
+                  transform_pivot_y: ${analog_min_len}
+              - obj:
                   id: lum_analog_sec
-                  points:
-                    - [110, 110]
-                    - [110, 20]
-                  line_color: ${accent}
-                  line_width: 2
-                  line_rounded: true
+                  align: CENTER
+                  y: -${analog_sec_len}
+                  width: 2
+                  height: ${analog_sec_len}
+                  bg_color: ${accent}
+                  bg_opa: COVER
+                  border_width: 0
+                  transform_pivot_x: 1
+                  transform_pivot_y: ${analog_sec_len}
+              # Center hub.
               - obj:
                   align: CENTER
                   width: 10
@@ -62,7 +87,23 @@ lvgl:
 interval:
   - interval: 1s
     then:
-      - lambda: |-
-          // Real implementation would rotate the line points based on
-          // id(ha_time).now() hour/min/sec. Left as a stub: rotate via
-          // an LVGL transform_angle property when running on hardware.
+      # All angles are in 0.1-degree units (LVGL convention).
+      - lvgl.widget.update:
+          id: lum_analog_hour
+          transform_angle: !lambda |-
+            auto t = id(ha_time).now();
+            int h = t.hour % 12;
+            return h * 300 + t.minute * 5;
+      - lvgl.widget.update:
+          id: lum_analog_min
+          transform_angle: !lambda |-
+            auto t = id(ha_time).now();
+            return t.minute * 60 + t.second;
+      - if:
+          condition:
+            lambda: 'return std::string("${analog_show_seconds}") == "true";'
+          then:
+            - lvgl.widget.update:
+                id: lum_analog_sec
+                transform_angle: !lambda |-
+                  return id(ha_time).now().second * 60;

@@ -1,21 +1,54 @@
 # ---------------------------------------------------------------
 # widget: album_art
-# version: 0.1.0
-# reads:        ${bg_alt} ${border} ${radius_md}
+# version: 0.2.0
+# reads:        ${bg_alt} ${border} ${border_w} ${radius_md}
 # targets:      media_page
-# exposes:      lum_album_root lum_album_image
-# ha_entities:  ${ha_media_player}.entity_picture
+# exposes:      lum_album_root lum_album_image lum_album_src
+#               lum_album_picture_sensor
+# ha_entities:  ${ha_media_player} (attribute: entity_picture)
 # ha_services:  none
 # config:       ${album_size:-160}
+#               ${ha_url:-http://homeassistant.local:8123}
 #
-# Note: ESPHome doesn't natively pull HA entity_picture URLs at runtime
-# without an HTTP image loader. This widget renders a placeholder card
-# and exposes lum_album_image so a future http_request-based fetcher
-# can update it. Until then it's a styled frame.
+# Pulls the currently-playing entity_picture from Home Assistant via
+# `online_image` and updates an LVGL image widget. Requires PSRAM
+# (the LilyGo AMOLED board has 8 MB OPI PSRAM, plenty).
+#
+# entity_picture is a relative path like
+# "/api/media_player_proxy/...?token=...". The widget prepends
+# ${ha_url} (override per device) to produce a full URL.
 # ---------------------------------------------------------------
 
 substitutions:
   album_size: "160"
+  ha_url:     "http://homeassistant.local:8123"
+
+http_request:
+  id: lum_album_http
+  verify_ssl: false
+  timeout: 10s
+
+online_image:
+  - id: lum_album_src
+    url: "${ha_url}/static/icons/favicon-192x192.png"
+    format: PNG
+    type: BINARY
+    resize: ${album_size}x${album_size}
+    on_download_finished:
+      - logger.log: "lumadeck: album art updated"
+
+text_sensor:
+  - platform: homeassistant
+    id: lum_album_picture_sensor
+    entity_id: ${ha_media_player}
+    attribute: entity_picture
+    on_value:
+      - lambda: |-
+          if (x.empty()) return;
+          std::string base = "${ha_url}";
+          std::string full = (x.rfind("http", 0) == 0) ? x : (base + x);
+          id(lum_album_src).set_url(full.c_str());
+      - component.update: lum_album_src
 
 lvgl:
   pages:
@@ -33,9 +66,7 @@ lvgl:
             radius: ${radius_md}
             pad_all: 0
             widgets:
-              - label:
+              - image:
                   id: lum_album_image
+                  src: lum_album_src
                   align: CENTER
-                  text_color: ${fg_muted}
-                  text_font: font_sm
-                  text: "no art"

@@ -56,16 +56,25 @@ the widgets behind those contracts to actually work end-to-end.
 
 ### P1 — functional gaps in the v0.1 widget set
 
-2. **`analog_clock.yaml`** — wire per-second hand rotation via LVGL
-   `transform_angle` updates. Currently the face renders but hands
-   don't move.
-3. **`media_card.yaml`** — add volume slider + mute button (people
-   will expect this on a media remote).
-4. **`album_art.yaml`** — implement HTTP fetcher pulling
-   `${ha_media_player}.entity_picture`. Blocked on choosing an
-   ESPHome image-loader pattern.
-5. **`notification_toast.yaml`** — verify `lvgl.widget.update y: ...`
-   actually animates. May need an explicit `lvgl.animate:` action.
+2. ~~**`analog_clock.yaml`** — wire per-second hand rotation.~~
+   **DONE.** Rewrote with rectangular hands rotated via
+   `transform_angle` (0.1° units) around `transform_pivot_y` at the
+   face center. Driven by an `interval: 1s` reading
+   `id(ha_time).now()`.
+3. ~~**`media_card.yaml`** — add volume slider + mute button.~~
+   **DONE.** Added a horizontal LVGL `slider:` bound to
+   `media_player.volume_set`, plus a mute toggle button driven by a
+   `binary_sensor` mirroring the HA `is_volume_muted` attribute.
+4. ~~**`album_art.yaml`** — HTTP fetcher.~~  **DONE.** Uses
+   ESPHome's `online_image:` + `http_request:` components. A
+   `text_sensor` watches the `entity_picture` attribute on the media
+   player and calls `set_url()` + `component.update:` on state
+   change. Configurable via `${ha_url}` and `${album_size}`.
+5. ~~**`notification_toast.yaml`** — animate.~~  **DONE.** ESPHome
+   doesn't expose `lv_anim_*` directly, so the slide is implemented
+   as a `repeat:` loop with a lambda computing the y-offset per step
+   (`${toast_anim_steps}` × `${toast_step_ms}` ms in each direction,
+   tunable). Smooth enough at 8 × 25 ms = 200 ms total.
 
 ### P2 — close out v0.2
 
@@ -219,15 +228,15 @@ Each widget must:
 
 See **Next up** at the top of this file for the priority ordering.
 
-- [ ] **(P1)** `analog_clock.yaml` — wire actual per-second
-      `transform_angle` updates; needs verification on hardware.
-- [ ] **(P1)** `album_art.yaml` — implement HTTP fetcher pulling
-      `${ha_media_player}.entity_picture`. Blocked on choosing an
-      ESPHome image-loader pattern.
-- [ ] **(P1)** `media_card.yaml` — add volume slider + mute button.
-- [ ] **(P1)** `notification_toast.yaml` — verify
-      `lvgl.widget.update y:` does what we expect on real LVGL
-      (may need an explicit `lvgl.animate:` action).
+- [x] **(P1)** `analog_clock.yaml` — `transform_angle` hand rotation
+      (v0.2.0). Awaits visual confirmation on hardware.
+- [x] **(P1)** `album_art.yaml` — `online_image` + dynamic URL via
+      `text_sensor.on_value` (v0.2.0). Awaits visual confirmation on
+      hardware.
+- [x] **(P1)** `media_card.yaml` — volume slider + mute toggle
+      (v0.2.0).
+- [x] **(P1)** `notification_toast.yaml` — stepwise slide animation
+      via `repeat:` loop (v0.2.0).
 - [ ] **(P3)** Add a generic `gauge.yaml` widget (sensor → arc).
 
 ---

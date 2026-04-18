@@ -1,0 +1,83 @@
+# ---------------------------------------------------------------
+# example: lilygo-test-rig
+# Exercises EVERY LumaDeck widget on a single device. Visually it's
+# a mess (widgets overlap because they all target home_page), but
+# that's intentional — this file's job is to prove every widget's
+# YAML structure is accepted by ESPHome's LVGL schema. `make verify`
+# uses it as a comprehensive smoke test.
+#
+# DO NOT flash this to a real panel. Use examples/lilygo-t-display-amoled.yaml
+# for an actual device build.
+# ---------------------------------------------------------------
+
+substitutions:
+  device_name:      "lumadeck_test_rig"
+  device_friendly:  "LumaDeck Test Rig"
+  ha_media_player:  "media_player.living_room"
+  # ring_slider needs a real entity to bind on_value to.
+  ring_target_entity: "light.living_room"
+
+packages:
+  core:    !include ../packages/core.yaml
+  board:   !include ../packages/board_esp32s3.yaml
+  theme:   !include ../themes/dark.yaml
+  fonts:   !include ../packages/fonts.yaml
+  colors:  !include ../packages/colors.yaml
+  display: !include ../packages/display.yaml
+  ha:      !include ../packages/ha.yaml
+  nav:     !include ../packages/nav.yaml
+  touch:   !include ../packages/touch.yaml
+  layout:  !include ../layouts/tall_240x536.yaml
+
+  # Every widget. If any one fails to parse, `make verify` flags it.
+  status:        !include ../widgets/status_bar.yaml
+  clock:         !include ../widgets/clock.yaml
+  analog_clock:  !include ../widgets/analog_clock.yaml
+  weather:       !include ../widgets/weather.yaml
+  ring_slider:   !include ../widgets/ring_slider.yaml
+  progress_ring: !include ../widgets/progress_ring.yaml
+  icon_grid:     !include ../widgets/icon_grid.yaml
+  scene_button:  !include ../widgets/scene_button.yaml
+  navtabs:       !include ../widgets/nav_tabs.yaml
+  light_btn:     !include ../widgets/light_button.yaml
+  media:         !include ../widgets/media_card.yaml
+  album:         !include ../widgets/album_art.yaml
+  thermo:        !include ../widgets/thermostat.yaml
+  toast:         !include ../widgets/notification_toast.yaml
+
+# Minimal hardware block so this counts as a DEVICE example for the
+# verifier. Uses the same LilyGo T-Display-S3 AMOLED pin map.
+esp32:
+  board: esp32-s3-devkitc-1
+  flash_size: 16MB
+  framework:
+    type: esp-idf
+  variant: ESP32S3
+
+psram:
+  mode: octal
+  speed: 80MHz
+
+spi:
+  - id: lcd_qspi
+    type: quad
+    clk_pin: GPIO47
+    data_pins: [GPIO18, GPIO7, GPIO48, GPIO5]
+
+display:
+  - platform: qspi_dbi
+    id: lum_display
+    model: RM67162
+    spi_id: lcd_qspi
+    cs_pin: GPIO6
+    reset_pin: GPIO17
+    enable_pin: GPIO38
+    dimensions:
+      width: 240
+      height: 536
+    auto_clear_enabled: false
+    update_interval: never
+
+lvgl:
+  displays:
+    - lum_display
