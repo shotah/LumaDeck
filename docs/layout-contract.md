@@ -14,7 +14,44 @@ They expect the consumer device YAML to provide a `display:` and
 | `screen_h`      | `360`     | Display height in px                     |
 | `screen_shape` | `round`   | `round` \| `square` \| `wide` \| `tall` |
 | `screen_radius` | `180`     | For round screens; ignored otherwise     |
-| `scale`         | `1.0`     | Multiplier widgets apply to font/size    |
+| `scale`         | `1.0`     | Informational hint; no math at YAML time (see below) |
+
+### About `scale`
+
+ESPHome's substitution engine is Jinja-based and doesn't support
+arbitrary math at config time, so `${scale}` is **not** consumed as
+a multiplier (`width: ${100 * scale}` is not valid). It's kept in
+the contract as a documentation hint — layouts SHOULD set it
+roughly proportional to their physical size, and any widget that
+wants per-screen scaling should expose its size as a substitution
+the layout can override directly.
+
+## Optional: override widget sizes for the screen
+
+Layouts MAY override widget size and font tokens to fit the
+physical screen better. This is the supported way to scale UI per
+panel.
+
+```yaml
+substitutions:
+  # ... required keys above ...
+
+  # Bigger fonts on a small dense AMOLED:
+  font_size_md:   "24"
+  font_size_lg:   "36"
+
+  # Trim widget heights so they fit the 240 px viewport:
+  media_h:        "200"   # default 250
+  thermo_h:       "200"   # default 220
+
+  # Shrink wide widgets:
+  status_w:       "220"
+  nav_w:          "220"
+```
+
+The widget contract documents the inline `${var | default(N)}`
+pattern that makes these overrides win regardless of include order.
+See [`widget-contract.md`](./widget-contract.md#optional-inputs-substitutions-a-widget-may-declare-with-defaults).
 
 ## Required pages
 

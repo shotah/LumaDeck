@@ -1,12 +1,13 @@
 # ---------------------------------------------------------------
 # widget: nav_tabs
-# version: 0.1.0
+# version: 0.2.0
 # reads:        ${bg_alt} ${fg} ${accent} ${border} ${font_sm}
 # targets:      home_page (anchored to region_bottom)
 # exposes:      lum_navtabs_root lum_navtabs_btn_home/media/lights/settings
 # ha_entities:  none
 # ha_services:  none
 # requires:     packages/nav.yaml
+# config:       ${nav_w:-280} ${nav_h:-44} ${nav_btn_w:-60} ${nav_btn_h:-32}
 # ---------------------------------------------------------------
 
 lvgl:
@@ -18,8 +19,8 @@ lvgl:
             align_to:
               id: region_bottom
               align: CENTER
-            width: 280
-            height: 44
+            width: ${nav_w | default(280)}
+            height: ${nav_h | default(44)}
             bg_color: ${bg_alt}
             border_color: ${border}
             border_width: ${border_w}
@@ -33,8 +34,8 @@ lvgl:
             widgets:
               - button:
                   id: lum_navtabs_btn_home
-                  width: 60
-                  height: 32
+                  width: ${nav_btn_w | default(60)}
+                  height: ${nav_btn_h | default(32)}
                   bg_opa: TRANSP
                   border_width: 0
                   on_click:
@@ -47,8 +48,8 @@ lvgl:
                         text: "home"
               - button:
                   id: lum_navtabs_btn_media
-                  width: 60
-                  height: 32
+                  width: ${nav_btn_w | default(60)}
+                  height: ${nav_btn_h | default(32)}
                   bg_opa: TRANSP
                   border_width: 0
                   on_click:
@@ -61,8 +62,8 @@ lvgl:
                         text: "media"
               - button:
                   id: lum_navtabs_btn_lights
-                  width: 60
-                  height: 32
+                  width: ${nav_btn_w | default(60)}
+                  height: ${nav_btn_h | default(32)}
                   bg_opa: TRANSP
                   border_width: 0
                   on_click:
@@ -75,8 +76,8 @@ lvgl:
                         text: "lights"
               - button:
                   id: lum_navtabs_btn_settings
-                  width: 60
-                  height: 32
+                  width: ${nav_btn_w | default(60)}
+                  height: ${nav_btn_h | default(32)}
                   bg_opa: TRANSP
                   border_width: 0
                   on_click:

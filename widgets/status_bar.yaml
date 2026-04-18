@@ -1,11 +1,18 @@
 # ---------------------------------------------------------------
 # widget: status_bar
-# version: 0.1.0
+# version: 0.3.0
 # reads:        ${bg} ${fg} ${fg_muted} ${success} ${error} ${font_sm}
 # targets:      home_page
 # exposes:      lum_status_root lum_status_wifi lum_status_api lum_status_time
 # ha_entities:  ha_time
 # ha_services:  none
+# config:       ${status_w:-220} ${status_h:-24}
+#
+# Sizes use inline `${var:-default}` syntax so any layout (or the
+# device YAML's top-level substitutions block) can override them
+# regardless of include order. Defining them in this widget's own
+# `substitutions:` block would make later-included widget defaults
+# beat earlier-included layout overrides.
 # ---------------------------------------------------------------
 
 lvgl:
@@ -19,8 +26,8 @@ lvgl:
               align: CENTER
               x: 0
               y: 0
-            width: 220
-            height: 24
+            width: ${status_w | default(220)}
+            height: ${status_h | default(24)}
             bg_opa: TRANSP
             border_width: 0
             pad_all: 0

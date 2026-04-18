@@ -16,7 +16,6 @@ substitutions:
   ring_attr:          "brightness_pct"
   ring_min:           "0"
   ring_max:           "100"
-  ring_size:          "220"
   ring_unit:          "%"
 
 lvgl:
@@ -26,8 +25,8 @@ lvgl:
         - arc:
             id: lum_ring_arc
             align: CENTER
-            width: ${ring_size}
-            height: ${ring_size}
+            width: ${ring_size | default(220)}
+            height: ${ring_size | default(220)}
             min_value: ${ring_min}
             max_value: ${ring_max}
             value: 50

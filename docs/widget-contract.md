@@ -44,13 +44,50 @@ Every widget file MUST start with a comment block like this:
 ## Optional inputs (substitutions a widget may declare with defaults)
 
 A widget MAY accept widget-specific configuration via substitutions
-prefixed with the widget name. Use ESPHome's `${var:-default}` syntax
-so the consumer can override without making them required.
+prefixed with the widget name. **Two patterns**, used for different
+purposes:
+
+### 1. Inline default — for sizes/positions a layout may override
+
+Use Jinja's `default()` filter directly in the YAML value. This is
+the right pattern for anything a layout could reasonably want to
+retune per screen (root width/height, key offsets, button sizes).
 
 ```yaml
-# in widgets/ring_slider.yaml
-# config: ${ring_slider_min:-0} ${ring_slider_max:-100}
+# in widgets/status_bar.yaml — DOES NOT declare status_w in
+# its substitutions: block. This way layouts (or device YAMLs) can
+# set `status_w: 480` and it wins regardless of include order.
+lvgl:
+  ...
+  width: ${status_w | default(220)}
+  height: ${status_h | default(24)}
 ```
+
+### 2. Substitutions block — for per-instance configuration
+
+Things that are widget-instance config (entity ids, labels, format
+strings) belong in the `substitutions:` block. The consumer overrides
+them at the device level.
+
+```yaml
+# in widgets/clock.yaml
+substitutions:
+  clock_format:    "%H:%M"
+  clock_date_fmt:  "%a %b %d"
+  clock_show_date: "true"
+```
+
+### Why two patterns?
+
+ESPHome substitutions follow "**later included package wins**". A
+widget's `substitutions:` block is a top-level package include, so
+its values can beat earlier-included layout overrides. The inline
+`default()` pattern sidesteps this entirely — the widget never
+"claims" the substitution name, so any prior or later override wins.
+
+**Rule of thumb**: if a layout could plausibly want to set it
+differently, use inline `default()`. If it's per-device user
+configuration, declare it in `substitutions:`.
 
 ## Composing widgets into a "screen"
 

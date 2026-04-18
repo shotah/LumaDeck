@@ -79,9 +79,17 @@ the widgets behind those contracts to actually work end-to-end.
 7. **Icon font rendering** — `font_icon` is declared but no widget
    actually uses it. Add an icon glyph to `nav_tabs.yaml` buttons as
    the first consumer.
-8. **Wire `${scale}` into widgets** — every layout declares a `scale`
-   substitution but widgets use raw px. Pick 2-3 anchor sizes and
-   multiply by `${scale}` in clock, media_card, ring_slider.
+8. ~~**Wire `${scale}` into widgets.**~~  **DONE — different
+   approach.** ESPHome's Jinja-based substitutions don't support
+   math (`${100 * scale}` is invalid), so a single multiplier was a
+   non-starter. Instead, every widget now exposes its primary
+   dimensions as `${var | default(N)}` inline (root width/height,
+   key offsets, button sizes). Layouts override per screen via
+   their `substitutions:` block. The wide_536x240 / tall_240x536
+   layouts use this to retune media cards, nav tabs, status bars,
+   etc. for the 1.91" AMOLED. Pattern documented in
+   `docs/widget-contract.md` and `docs/layout-contract.md`.
+   `${scale}` stays in the layout contract as an informational hint.
 
 ### P3 — new widgets
 
@@ -183,9 +191,9 @@ It must NOT contain device-specific pins.
 - [x] `layouts/_template.yaml` with the layout contract.
 - [x] Introduce a scaling system: `${scale}` substitution declared by
       every layout.
-- [ ] **Actually consume `${scale}` inside widgets** so font/size
-      computations follow it. Today the substitution exists but
-      widgets use raw px values.
+- [x] Per-widget size scaling via inline `${var | default(N)}` —
+      layouts override widget sizes directly. `${scale}` stays as a
+      hint only. See `docs/widget-contract.md`.
 
 ---
 

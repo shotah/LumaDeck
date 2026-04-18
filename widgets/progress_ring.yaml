@@ -11,7 +11,6 @@
 # ---------------------------------------------------------------
 
 substitutions:
-  progress_size:  "180"
   progress_min:   "0"
   progress_max:   "100"
   progress_unit:  "%"
@@ -23,8 +22,8 @@ lvgl:
         - arc:
             id: lum_progress_arc
             align: CENTER
-            width: ${progress_size}
-            height: ${progress_size}
+            width: ${progress_size | default(180)}
+            height: ${progress_size | default(180)}
             min_value: ${progress_min}
             max_value: ${progress_max}
             value: 0

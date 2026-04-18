@@ -21,7 +21,7 @@ lvgl:
         - label:
             id: lum_clock_time
             align: CENTER
-            y: -10
+            y: ${clock_y_time | default(-10)}
             text_color: ${fg}
             text_font: font_xl
             text: "--:--"
@@ -29,7 +29,7 @@ lvgl:
         - label:
             id: lum_clock_date
             align: CENTER
-            y: 36
+            y: ${clock_y_date | default(36)}
             text_color: ${fg_muted}
             text_font: font_sm
             text: ""

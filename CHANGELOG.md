@@ -51,6 +51,35 @@ project adheres to [Semantic Versioning](https://semver.org/).
   on a single device (visually it's a mess, but every widget's YAML
   is verified to parse against ESPHome's LVGL schema).
 
+### Per-widget size scaling
+
+* Every widget now exposes its primary dimensions (root
+  width/height, button sizes, label widths, key offsets) as
+  inline-default substitutions using Jinja's `${var | default(N)}`
+  filter. Layouts override these directly to fit different physical
+  panels.
+* Documented two distinct substitution patterns in
+  `docs/widget-contract.md`:
+  * **Inline default (`${var | default(N)}`)** — for sizes/offsets
+    a layout may override. Doesn't claim the substitution name, so
+    later includes can't accidentally beat the override.
+  * **`substitutions:` block** — for per-instance configuration
+    (entity ids, labels, format strings).
+* `layouts/wide_536x240.yaml` and `layouts/tall_240x536.yaml` now
+  override widget sizes (media cards, nav tabs, status bars, etc.)
+  to fit the 1.91" AMOLED's 240 px short axis.
+* `docs/layout-contract.md` clarifies that `${scale}` is an
+  informational hint, not a math multiplier — ESPHome's
+  Jinja-based substitutions don't support arbitrary math at config
+  time. Per-screen scaling is done via the per-widget overrides
+  above.
+* Widgets bumped: `clock` → 0.2.0, `status_bar` → 0.3.0,
+  `nav_tabs` → 0.2.0, `weather` → 0.2.0, `light_button` → 0.2.0,
+  `media_card` → 0.3.0, `thermostat` → 0.2.0,
+  `notification_toast` → 0.3.0, plus `analog_clock`,
+  `progress_ring`, `ring_slider`, `album_art` migrated to inline
+  defaults.
+
 ### Touch gestures
 
 * `packages/touch.yaml` → v0.2.0. Software swipe detection.

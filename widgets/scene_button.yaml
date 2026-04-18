@@ -20,8 +20,8 @@ lvgl:
         - button:
             id: lum_scene_btn
             align: CENTER
-            width: 160
-            height: 56
+            width: ${scene_w | default(160)}
+            height: ${scene_h | default(56)}
             bg_color: ${accent}
             radius: ${radius_pill}
             on_click:

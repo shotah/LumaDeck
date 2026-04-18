@@ -1,6 +1,6 @@
 # ---------------------------------------------------------------
 # widget: thermostat
-# version: 0.1.0
+# version: 0.2.0
 # reads:        ${bg_alt} ${fg} ${fg_muted} ${accent} ${warn} ${border}
 # targets:      climate_page
 # exposes:      lum_thermo_root lum_thermo_current lum_thermo_target
@@ -8,7 +8,9 @@
 # ha_entities:  ${ha_thermostat}
 # ha_services:  climate.set_temperature
 # requires:     packages/ha.yaml
+# config:       ${thermo_w:-280} ${thermo_h:-220}
 # ---------------------------------------------------------------
+
 
 sensor:
   - platform: homeassistant
@@ -42,8 +44,8 @@ lvgl:
         - obj:
             id: lum_thermo_root
             align: CENTER
-            width: 280
-            height: 220
+            width: ${thermo_w | default(280)}
+            height: ${thermo_h | default(220)}
             bg_color: ${bg_alt}
             border_color: ${border}
             border_width: ${border_w}

@@ -1,6 +1,6 @@
 # ---------------------------------------------------------------
 # widget: media_card
-# version: 0.2.0
+# version: 0.3.0
 # reads:        ${bg_alt} ${bg} ${fg} ${fg_muted} ${accent} ${success}
 #               ${border} ${border_w} ${radius_lg} ${radius_md}
 #               ${font_md} ${font_sm} ${pad_md}
@@ -14,7 +14,9 @@
 # ha_services:  media_player.media_play_pause / media_next_track /
 #               media_previous_track / volume_set / volume_mute
 # requires:     packages/ha.yaml
+# config:       ${media_w:-280} ${media_h:-250} ${media_inner_w:-240}
 # ---------------------------------------------------------------
+
 
 text_sensor:
   - platform: homeassistant
@@ -70,8 +72,8 @@ lvgl:
         - obj:
             id: lum_media_root
             align: CENTER
-            width: 280
-            height: 250
+            width: ${media_w | default(280)}
+            height: ${media_h | default(250)}
             bg_color: ${bg_alt}
             border_color: ${border}
             border_width: ${border_w}
@@ -89,7 +91,7 @@ lvgl:
                   text_font: font_md
                   text: "Nothing playing"
                   long_mode: SCROLL_CIRCULAR
-                  width: 240
+                  width: ${media_inner_w | default(240)}
               - label:
                   id: lum_media_artist
                   text_color: ${fg_muted}
@@ -97,7 +99,7 @@ lvgl:
                   text: ""
               # Transport controls.
               - obj:
-                  width: 240
+                  width: ${media_inner_w | default(240)}
                   height: 56
                   bg_opa: TRANSP
                   border_width: 0
@@ -151,7 +153,7 @@ lvgl:
                               text: ">>"
               # Volume row: mute toggle + horizontal slider.
               - obj:
-                  width: 240
+                  width: ${media_inner_w | default(240)}
                   height: 36
                   bg_opa: TRANSP
                   border_width: 0

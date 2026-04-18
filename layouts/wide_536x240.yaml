@@ -23,6 +23,23 @@ substitutions:
   font_size_sm:   "18"
   font_size_icon: "28"
 
+  # Widget size overrides for the 536 x 240 viewport. Default widget
+  # sizes assume taller screens; here we trim heights and grow widths
+  # to fit the landscape strip.
+  status_w:        "480"
+  nav_w:           "440"
+  nav_h:           "44"
+  media_w:         "500"
+  media_h:         "200"   # default 250 doesn't fit 240-tall screens
+  media_inner_w:   "460"
+  thermo_w:        "420"
+  thermo_h:        "200"   # default 220 doesn't fit
+  icongrid_w:      "500"
+  icongrid_h:      "180"
+  weather_w:       "240"
+  toast_w:         "440"
+  toast_label_w:   "400"
+
 lvgl:
   pages:
     - id: home_page

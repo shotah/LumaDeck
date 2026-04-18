@@ -1,13 +1,15 @@
 # ---------------------------------------------------------------
 # widget: weather
-# version: 0.1.0
+# version: 0.2.0
 # reads:        ${bg_alt} ${fg} ${fg_muted} ${accent} ${font_lg} ${font_sm}
 # targets:      home_page
 # exposes:      lum_weather_root lum_weather_temp lum_weather_cond
 # ha_entities:  ${ha_weather}
 # ha_services:  none
 # requires:     packages/ha.yaml
+# config:       ${weather_w:-180} ${weather_h:-64} ${weather_y:-36}
 # ---------------------------------------------------------------
+
 
 sensor:
   - platform: homeassistant
@@ -40,9 +42,9 @@ lvgl:
             align_to:
               id: region_top
               align: CENTER
-              y: 36
-            width: 180
-            height: 64
+              y: ${weather_y | default(36)}
+            width: ${weather_w | default(180)}
+            height: ${weather_h | default(64)}
             bg_color: ${bg_alt}
             border_color: ${border}
             border_width: ${border_w}

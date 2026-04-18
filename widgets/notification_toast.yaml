@@ -30,8 +30,8 @@ lvgl:
           id: lum_toast_root
           align: TOP_MID
           y: ${toast_y_hidden}
-          width: 280
-          height: 44
+          width: ${toast_w | default(280)}
+          height: ${toast_h | default(44)}
           bg_color: ${bg_alt}
           border_color: ${accent}
           border_width: ${border_w}
@@ -46,7 +46,7 @@ lvgl:
                 text_font: font_sm
                 text: ""
                 long_mode: DOT
-                width: 250
+                width: ${toast_label_w | default(250)}
 
 script:
   - id: lum_toast_show

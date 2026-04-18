@@ -1,12 +1,12 @@
 # ---------------------------------------------------------------
 # widget: light_button
-# version: 0.1.0
+# version: 0.2.0
 # reads:        ${bg_alt} ${fg} ${accent} ${success} ${fg_muted} ${border}
 # targets:      lights_page
 # exposes:      lum_light_btn lum_light_label lum_light_state_src
 # ha_entities:  ${ha_light_primary}
 # ha_services:  light.toggle
-# config:       ${light_button_label:-Light}
+# config:       ${light_button_label:-Light} ${light_w:-200} ${light_h:-80}
 # ---------------------------------------------------------------
 
 substitutions:
@@ -36,8 +36,8 @@ lvgl:
         - button:
             id: lum_light_btn
             align: CENTER
-            width: 200
-            height: 80
+            width: ${light_w | default(200)}
+            height: ${light_h | default(80)}
             bg_color: ${fg_muted}
             border_color: ${border}
             border_width: ${border_w}

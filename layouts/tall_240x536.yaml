@@ -21,6 +21,23 @@ substitutions:
   font_size_sm:   "18"
   font_size_icon: "28"
 
+  # Widget size overrides for the 240 x 536 viewport. Width is the
+  # tight axis (240 px); shrink wide widgets, keep heights generous.
+  status_w:        "220"
+  nav_w:           "220"
+  media_w:         "220"
+  media_h:         "320"
+  media_inner_w:   "200"
+  thermo_w:        "220"
+  thermo_h:        "300"
+  icongrid_w:      "220"
+  icongrid_h:      "280"
+  icongrid_btn_size: "64"
+  weather_w:       "220"
+  toast_w:         "220"
+  toast_label_w:   "190"
+  light_w:         "220"
+
 lvgl:
   pages:
     - id: home_page

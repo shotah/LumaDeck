@@ -15,13 +15,7 @@
 # ---------------------------------------------------------------
 
 substitutions:
-  analog_size:          "220"
   analog_show_seconds:  "true"
-
-  # Hand lengths (px). Tweak in a consumer device YAML to taste.
-  analog_hour_len:      "50"
-  analog_min_len:       "70"
-  analog_sec_len:       "80"
 
 lvgl:
   pages:
@@ -30,8 +24,8 @@ lvgl:
         - obj:
             id: lum_analog_face
             align: CENTER
-            width: ${analog_size}
-            height: ${analog_size}
+            width: ${analog_size | default(220)}
+            height: ${analog_size | default(220)}
             radius: ${radius_pill}
             bg_color: ${bg_alt}
             border_color: ${border}
@@ -43,38 +37,38 @@ lvgl:
               - obj:
                   id: lum_analog_hour
                   align: CENTER
-                  y: -${analog_hour_len}
+                  y: -${analog_hour_len | default(50)}
                   width: 6
-                  height: ${analog_hour_len}
+                  height: ${analog_hour_len | default(50)}
                   bg_color: ${fg}
                   bg_opa: COVER
                   border_width: 0
                   radius: 3
                   transform_pivot_x: 3
-                  transform_pivot_y: ${analog_hour_len}
+                  transform_pivot_y: ${analog_hour_len | default(50)}
               - obj:
                   id: lum_analog_min
                   align: CENTER
-                  y: -${analog_min_len}
+                  y: -${analog_min_len | default(70)}
                   width: 4
-                  height: ${analog_min_len}
+                  height: ${analog_min_len | default(70)}
                   bg_color: ${fg}
                   bg_opa: COVER
                   border_width: 0
                   radius: 2
                   transform_pivot_x: 2
-                  transform_pivot_y: ${analog_min_len}
+                  transform_pivot_y: ${analog_min_len | default(70)}
               - obj:
                   id: lum_analog_sec
                   align: CENTER
-                  y: -${analog_sec_len}
+                  y: -${analog_sec_len | default(80)}
                   width: 2
-                  height: ${analog_sec_len}
+                  height: ${analog_sec_len | default(80)}
                   bg_color: ${accent}
                   bg_opa: COVER
                   border_width: 0
                   transform_pivot_x: 1
-                  transform_pivot_y: ${analog_sec_len}
+                  transform_pivot_y: ${analog_sec_len | default(80)}
               # Center hub.
               - obj:
                   align: CENTER

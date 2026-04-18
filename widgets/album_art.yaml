@@ -20,7 +20,6 @@
 # ---------------------------------------------------------------
 
 substitutions:
-  album_size: "160"
   ha_url:     "http://homeassistant.local:8123"
 
 http_request:
@@ -33,7 +32,7 @@ online_image:
     url: "${ha_url}/static/icons/favicon-192x192.png"
     format: PNG
     type: BINARY
-    resize: ${album_size}x${album_size}
+    resize: ${album_size | default(160)}x${album_size | default(160)}
     on_download_finished:
       - logger.log: "lumadeck: album art updated"
 
@@ -58,8 +57,8 @@ lvgl:
             id: lum_album_root
             align: TOP_MID
             y: 16
-            width: ${album_size}
-            height: ${album_size}
+            width: ${album_size | default(160)}
+            height: ${album_size | default(160)}
             bg_color: ${bg_alt}
             border_color: ${border}
             border_width: ${border_w}
