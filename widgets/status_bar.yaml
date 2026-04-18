@@ -1,18 +1,19 @@
 # ---------------------------------------------------------------
 # widget: status_bar
-# version: 0.3.0
-# reads:        ${bg} ${fg} ${fg_muted} ${success} ${error} ${font_sm}
+# version: 0.4.0
+# reads:        ${bg} ${fg} ${fg_muted} ${success} ${error}
+#               ${font_sm} ${font_icon}
 # targets:      home_page
 # exposes:      lum_status_root lum_status_wifi lum_status_api lum_status_time
 # ha_entities:  ha_time
 # ha_services:  none
+# requires:     packages/fonts.yaml
 # config:       ${status_w:-220} ${status_h:-24}
 #
-# Sizes use inline `${var:-default}` syntax so any layout (or the
-# device YAML's top-level substitutions block) can override them
-# regardless of include order. Defining them in this widget's own
-# `substitutions:` block would make later-included widget defaults
-# beat earlier-included layout overrides.
+# Wifi / API indicators render Material Symbols icon glyphs from
+# `font_icon`. Sizes use inline `${var | default(N)}` syntax so any
+# layout (or the device YAML's top-level substitutions block) can
+# override them regardless of include order.
 # ---------------------------------------------------------------
 
 lvgl:
@@ -40,8 +41,8 @@ lvgl:
               - label:
                   id: lum_status_wifi
                   text_color: ${success}
-                  text_font: font_sm
-                  text: "wifi"
+                  text_font: font_icon
+                  text: "\uE63E"   # wifi
               - label:
                   id: lum_status_time
                   text_color: ${fg}
@@ -50,8 +51,8 @@ lvgl:
               - label:
                   id: lum_status_api
                   text_color: ${success}
-                  text_font: font_sm
-                  text: "api"
+                  text_font: font_icon
+                  text: "\uE2BF"   # cloud_done
 
 interval:
   - interval: 1s

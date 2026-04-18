@@ -1,20 +1,25 @@
 # ---------------------------------------------------------------
 # widget: media_card
-# version: 0.3.0
+# version: 0.4.0
 # reads:        ${bg_alt} ${bg} ${fg} ${fg_muted} ${accent} ${success}
 #               ${border} ${border_w} ${radius_lg} ${radius_md}
-#               ${font_md} ${font_sm} ${pad_md}
+#               ${font_md} ${font_sm} ${font_icon} ${pad_md}
 # targets:      media_page
 # exposes:      lum_media_root lum_media_title lum_media_artist
 #               lum_media_btn_prev lum_media_btn_play lum_media_btn_next
-#               lum_media_btn_mute lum_media_vol
+#               lum_media_btn_mute lum_media_vol lum_media_play_label
+#               lum_media_mute_label
 #               lum_media_title_src lum_media_artist_src
-#               lum_media_volume_src lum_media_muted_src
+#               lum_media_volume_src lum_media_muted_src lum_media_state_src
 # ha_entities:  ${ha_media_player}
 # ha_services:  media_player.media_play_pause / media_next_track /
 #               media_previous_track / volume_set / volume_mute
-# requires:     packages/ha.yaml
+# requires:     packages/ha.yaml, packages/fonts.yaml
 # config:       ${media_w:-280} ${media_h:-250} ${media_inner_w:-240}
+#
+# Transport buttons render Material Symbols icon glyphs from
+# `font_icon`. The play/pause icon swaps automatically based on the
+# media_player state attribute.
 # ---------------------------------------------------------------
 
 
@@ -36,6 +41,24 @@ text_sensor:
       - lvgl.label.update:
           id: lum_media_artist
           text: !lambda 'return x.c_str();'
+
+  # Watch the media_player state so the center button shows pause
+  # while playing and play otherwise.
+  - platform: homeassistant
+    id: lum_media_state_src
+    entity_id: ${ha_media_player}
+    on_value:
+      - if:
+          condition:
+            lambda: 'return x == "playing";'
+          then:
+            - lvgl.label.update:
+                id: lum_media_play_label
+                text: "\uE034"   # pause
+          else:
+            - lvgl.label.update:
+                id: lum_media_play_label
+                text: "\uE037"   # play_arrow
 
 sensor:
   - platform: homeassistant
@@ -60,10 +83,17 @@ binary_sensor:
             - lvgl.widget.update:
                 id: lum_media_btn_mute
                 bg_color: ${accent}
+            - lvgl.label.update:
+                id: lum_media_mute_label
+                text: "\uE04F"   # volume_off
           else:
             - lvgl.widget.update:
                 id: lum_media_btn_mute
                 bg_color: ${bg}
+            - lvgl.label.update:
+                id: lum_media_mute_label
+                text: "\uE050"   # volume_up
+
 
 lvgl:
   pages:
@@ -121,8 +151,8 @@ lvgl:
                           - label:
                               align: CENTER
                               text_color: ${fg}
-                              text_font: font_md
-                              text: "<<"
+                              text_font: font_icon
+                              text: "\uE045"   # skip_previous
                     - button:
                         id: lum_media_btn_play
                         width: 72
@@ -133,10 +163,11 @@ lvgl:
                           - script.execute: ha_media_play_pause
                         widgets:
                           - label:
+                              id: lum_media_play_label
                               align: CENTER
                               text_color: ${bg}
-                              text_font: font_md
-                              text: "play"
+                              text_font: font_icon
+                              text: "\uE037"   # play_arrow (default)
                     - button:
                         id: lum_media_btn_next
                         width: 64
@@ -149,8 +180,8 @@ lvgl:
                           - label:
                               align: CENTER
                               text_color: ${fg}
-                              text_font: font_md
-                              text: ">>"
+                              text_font: font_icon
+                              text: "\uE044"   # skip_next
               # Volume row: mute toggle + horizontal slider.
               - obj:
                   width: ${media_inner_w | default(240)}
@@ -179,10 +210,11 @@ lvgl:
                                   return id(lum_media_muted_src).state ? "false" : "true";
                         widgets:
                           - label:
+                              id: lum_media_mute_label
                               align: CENTER
                               text_color: ${fg}
-                              text_font: font_sm
-                              text: "M"
+                              text_font: font_icon
+                              text: "\uE050"   # volume_up (default)
                     - slider:
                         id: lum_media_vol
                         width: 180

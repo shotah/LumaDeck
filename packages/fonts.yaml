@@ -37,8 +37,34 @@ font:
     size: ${font_size_sm}
     glyphs: *lumadeck_glyphs
 
-  # Material Design Icons via gfonts. Override in a consumer device by
-  # redefining the `font_icon` id with a different icon set.
+  # Material Symbols Outlined icon font. The `glyphs:` list is the
+  # canonical LumaDeck icon set — every codepoint here is consumed by
+  # at least one widget. Add new ones here when a widget needs them
+  # (rebuild flash; you can't lazy-load glyphs at runtime).
+  #
+  # Codepoints are sourced from https://fonts.google.com/icons.
+  # Each entry's comment is the icon name in the upstream catalogue
+  # so authors can look up substitutes.
   - file: "gfonts://Material Symbols Outlined"
     id: font_icon
     size: ${font_size_icon}
+    glyphs:
+      - "\uE88A"   # home
+      - "\uE405"   # music_note
+      - "\uE0F0"   # lightbulb
+      - "\uE8B8"   # settings
+      - "\uE037"   # play_arrow
+      - "\uE034"   # pause
+      - "\uE044"   # skip_next
+      - "\uE045"   # skip_previous
+      - "\uE050"   # volume_up
+      - "\uE04F"   # volume_off (mute)
+      - "\uE63E"   # wifi
+      - "\uE1DA"   # signal_wifi_off
+      - "\uE2BF"   # cloud_done
+      - "\uE2C1"   # cloud_off
+      - "\uE5C7"   # arrow_drop_up
+      - "\uE5C5"   # arrow_drop_down
+      - "\uE1FF"   # device_thermostat
+      - "\uE518"   # light_mode
+      - "\uF159"   # dark_mode

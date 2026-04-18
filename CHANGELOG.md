@@ -51,6 +51,34 @@ project adheres to [Semantic Versioning](https://semver.org/).
   on a single device (visually it's a mess, but every widget's YAML
   is verified to parse against ESPHome's LVGL schema).
 
+### Icons + edge swipe
+
+* `packages/fonts.yaml` now ships a documented set of 19 Material
+  Symbols Outlined codepoints (home, music_note, lightbulb, settings,
+  play_arrow, pause, skip_next/previous, volume_up/off, wifi,
+  signal_wifi_off, cloud_done/off, arrow_drop_up/down,
+  device_thermostat, light_mode, dark_mode). New `docs/icons.md`
+  documents the catalogue and how to add new glyphs.
+* `widgets/nav_tabs.yaml` → v0.3.0. Replaces text labels (`home`,
+  `media`, etc.) with proper icon glyphs.
+* `widgets/media_card.yaml` → v0.4.0. Transport buttons render
+  skip_previous / play_arrow / skip_next icons; the play button
+  auto-swaps to pause while the media_player is in `playing` state
+  (via a new `text_sensor`). Mute button shows volume_up /
+  volume_off based on HA `is_volume_muted`.
+* `widgets/status_bar.yaml` → v0.4.0. wifi + cloud_done icons
+  replace the placeholder "wifi" / "api" text.
+* `packages/touch.yaml` → v0.3.0. Swipe gestures now require the
+  start point to be within `${swipe_edge_px}` (default 40 px) of
+  the left or right screen edge. Eliminates the slider/arc drag
+  conflict — horizontal drags in the middle of the screen no longer
+  fire navigation events. Set `swipe_edge_px: ${screen_w}` to
+  restore the v0.2 anywhere-swipe behaviour.
+* `docs/touch-gestures.md` updated with the new edge zone tuning
+  knob and how to disable it.
+* `layouts/wide_536x240.yaml`: `media_h` trimmed from 200 to 180 so
+  the title/artist labels in `media_card` v0.4.0 don't get squeezed.
+
 ### Per-widget size scaling
 
 * Every widget now exposes its primary dimensions (root

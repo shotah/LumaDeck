@@ -76,9 +76,11 @@ the widgets behind those contracts to actually work end-to-end.
    `${swipe_max_time_ms}` (default 500 ms). Wiring template +
    tuning notes in `docs/touch-gestures.md`. Wired into the LilyGo
    example and consumer-repo-template.
-7. **Icon font rendering** — `font_icon` is declared but no widget
-   actually uses it. Add an icon glyph to `nav_tabs.yaml` buttons as
-   the first consumer.
+7. ~~**Icon font rendering.**~~  **DONE.** `packages/fonts.yaml`
+   now ships 19 documented Material Symbols codepoints. `nav_tabs`,
+   `media_card`, and `status_bar` v0.4.0 render real icons; the
+   play/pause and mute icons auto-swap from HA state. Catalogue +
+   how-to-add docs in `docs/icons.md`.
 8. ~~**Wire `${scale}` into widgets.**~~  **DONE — different
    approach.** ESPHome's Jinja-based substitutions don't support
    math (`${100 * scale}` is invalid), so a single multiplier was a
@@ -314,13 +316,15 @@ end-to-end.
 - [x] Touch gestures abstraction — `packages/touch.yaml` v0.2.0 has
       software swipe detection wired to `nav_next_page` /
       `nav_prev_page`. See `docs/touch-gestures.md`.
-- [ ] **Icon font** — `packages/fonts.yaml` declares `font_icon` from
-      Material Symbols Outlined but no widget actually renders
-      icon glyphs yet.
-- [ ] **Edge-only swipe gestures** (v0.3 follow-up). Today swipes
-      can fire mid-slider-drag if the user crosses the threshold;
-      restricting swipes to `region_left` / `region_right` start
-      points would eliminate the conflict entirely.
+- [x] **Icon font** — `packages/fonts.yaml` ships a documented set of
+      Material Symbols codepoints. `nav_tabs`, `media_card`, and
+      `status_bar` now render real icons. play/pause and mute icons
+      auto-swap from HA state. See `docs/icons.md` for the catalogue
+      and how to add more.
+- [x] **Edge-only swipe gestures.** `packages/touch.yaml` now
+      requires swipes to START within `${swipe_edge_px}` of the
+      left or right edge (default 40 px). Eliminates the slider/arc
+      drag conflict. Set `swipe_edge_px: ${screen_w}` to disable.
 
 ### v0.3 — partial
 

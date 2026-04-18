@@ -30,6 +30,10 @@ A swipe qualifies if:
 * Total time < `${swipe_max_time_ms}` (default `500` ms)
 * Horizontal distance > `${swipe_min_dist}` (default `60` px)
 * Horizontal distance > vertical distance (so vertical drags don't fire)
+* The gesture **starts** within `${swipe_edge_px}` of the left or
+  right edge (default `40` px). This is the edge-only filter that
+  prevents slider/arc drags in the middle of the screen from
+  accidentally firing page changes — see "Tuning" below.
 
 ## Wiring (consumer device YAML)
 
@@ -75,24 +79,40 @@ Override the substitutions in your device YAML, **above** the
 substitutions:
   swipe_min_dist:    "80"   # demand a longer swipe (less sensitive)
   swipe_max_time_ms: "350"  # require a snappier flick
+  swipe_edge_px:     "60"   # widen the edge zone (more permissive)
 ```
 
-A higher `swipe_min_dist` makes accidental swipes during slider /
-arc drags less likely; a lower one makes navigation feel snappier.
-For 240 px-wide screens, 50–80 px is the useful range.
+* `swipe_min_dist` — higher = less sensitive. 50–80 px is the useful
+  range for 240 px-wide screens.
+* `swipe_max_time_ms` — lower = require a snappier flick. Useful for
+  filtering out slow drags.
+* `swipe_edge_px` — width of the start zone at each screen edge.
+  Set to `${screen_w}` (or any value larger than half the screen
+  width) to disable the edge restriction entirely and allow swipes
+  from anywhere.
+
+## Disabling edge filtering
+
+If you'd rather have swipes work from anywhere on the screen
+(legacy v0.2 behaviour), set the edge zone to span the whole screen:
+
+```yaml
+substitutions:
+  swipe_edge_px: "${screen_w}"
+```
+
+You'll re-introduce the slider-drag conflict, but it can be useful
+for screens that don't have any sliders or arcs.
 
 ## Known limitations
 
-* **Slider/arc drag conflict.** ESPHome's touchscreen events fire
-  alongside LVGL widget interaction, so a long horizontal slider
-  drag can also be detected as a swipe. The high default threshold
-  mitigates this. A v0.3 follow-up will add edge-only swipes (only
-  swipes starting in `region_left` / `region_right` count as
-  navigation), which sidesteps the issue entirely.
 * **CST816 native gestures.** The CST816 IC can report gestures
   itself, but exposing that is driver-specific. Software detection
   works for every touchscreen LumaDeck supports, so we lean on it
   for now.
+* **Vertical swipes** are detected (`dy`) but not bound to any
+  action yet. Reserved for v0.3 — pull-to-refresh, dismiss toast,
+  etc.
 
 ## Disabling
 

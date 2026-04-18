@@ -1,13 +1,17 @@
 # ---------------------------------------------------------------
 # widget: nav_tabs
-# version: 0.2.0
-# reads:        ${bg_alt} ${fg} ${accent} ${border} ${font_sm}
+# version: 0.3.0
+# reads:        ${bg_alt} ${fg} ${accent} ${border} ${font_icon}
 # targets:      home_page (anchored to region_bottom)
 # exposes:      lum_navtabs_root lum_navtabs_btn_home/media/lights/settings
 # ha_entities:  none
 # ha_services:  none
-# requires:     packages/nav.yaml
+# requires:     packages/nav.yaml, packages/fonts.yaml
 # config:       ${nav_w:-280} ${nav_h:-44} ${nav_btn_w:-60} ${nav_btn_h:-32}
+#
+# Buttons render Material Symbols icon glyphs from `font_icon`.
+# Override per-icon via the substitutions below to swap symbols or
+# fall back to text labels.
 # ---------------------------------------------------------------
 
 lvgl:
@@ -44,8 +48,8 @@ lvgl:
                     - label:
                         align: CENTER
                         text_color: ${fg}
-                        text_font: font_sm
-                        text: "home"
+                        text_font: font_icon
+                        text: "\uE88A"   # home
               - button:
                   id: lum_navtabs_btn_media
                   width: ${nav_btn_w | default(60)}
@@ -58,8 +62,8 @@ lvgl:
                     - label:
                         align: CENTER
                         text_color: ${fg}
-                        text_font: font_sm
-                        text: "media"
+                        text_font: font_icon
+                        text: "\uE405"   # music_note
               - button:
                   id: lum_navtabs_btn_lights
                   width: ${nav_btn_w | default(60)}
@@ -72,8 +76,8 @@ lvgl:
                     - label:
                         align: CENTER
                         text_color: ${fg}
-                        text_font: font_sm
-                        text: "lights"
+                        text_font: font_icon
+                        text: "\uE0F0"   # lightbulb
               - button:
                   id: lum_navtabs_btn_settings
                   width: ${nav_btn_w | default(60)}
@@ -86,5 +90,5 @@ lvgl:
                     - label:
                         align: CENTER
                         text_color: ${fg}
-                        text_font: font_sm
-                        text: "set"
+                        text_font: font_icon
+                        text: "\uE8B8"   # settings

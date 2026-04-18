@@ -30,7 +30,8 @@ substitutions:
   nav_w:           "440"
   nav_h:           "44"
   media_w:         "500"
-  media_h:         "200"   # default 250 doesn't fit 240-tall screens
+  media_h:         "180"   # default 250 doesn't fit 240-tall screens; even
+                            # 200 leaves the title/artist labels squeezed
   media_inner_w:   "460"
   thermo_w:        "420"
   thermo_h:        "200"   # default 220 doesn't fit

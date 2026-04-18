@@ -49,6 +49,13 @@ substitutions:
   # Maximum gesture duration (ms). Slower drags are treated as
   # widget interactions, not swipes.
   swipe_max_time_ms: "500"
+  # Edge zone width (px). Swipes must START within this many pixels
+  # of the left or right screen edge to count as navigation; this
+  # prevents slider/arc drags in the middle of the screen from
+  # accidentally firing page changes. Set to a large value (e.g.
+  # ${screen_w}) to disable the restriction and allow swipes from
+  # anywhere.
+  swipe_edge_px:     "40"
 
 globals:
   - id: lum_touch_active
@@ -126,12 +133,19 @@ script:
           if (dt > ${swipe_max_time_ms}) return;
           int adx = dx < 0 ? -dx : dx;
           int ady = dy < 0 ? -dy : dy;
-          if (adx > ady && adx > ${swipe_min_dist}) {
-            if (dx < 0) {
-              id(nav_next_page).execute();
-            } else {
-              id(nav_prev_page).execute();
-            }
+          if (adx <= ady || adx <= ${swipe_min_dist}) return;
+
+          // Edge filter: require the gesture to START in the left or
+          // right edge zone. Sidesteps the slider-drag false-positive.
+          int sx = id(lum_touch_start_x);
+          bool from_left_edge  = sx < ${swipe_edge_px};
+          bool from_right_edge = sx > (${screen_w} - ${swipe_edge_px});
+          if (!from_left_edge && !from_right_edge) return;
+
+          if (dx < 0) {
+            id(nav_next_page).execute();
+          } else {
+            id(nav_prev_page).execute();
           }
           // Vertical swipes are reserved for v0.3
           // (could trigger pull-to-refresh, dismiss toast, etc.).
