@@ -56,4 +56,7 @@ venv/
 # ---- ESPHome consumer artifacts (if anyone runs esphome here) ----
 .esphome/
 secrets.yaml
+# Note: the global `secrets.yaml` rule above also matches
+# `examples/secrets.yaml`, which `make verify` materialises from
+# `examples/secrets.example.yaml` (committed) before validation.
 

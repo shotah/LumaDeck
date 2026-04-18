@@ -33,23 +33,11 @@ the widgets behind those contracts to actually work end-to-end.
 
 ### P0 — unblocks everything else
 
-1. **Compile every example with `esphome config`.** If `!extend
-   page-id` or any other LVGL merge pattern I used isn't valid in your
-   ESPHome version, half the widgets will need restructuring. Until
-   this is verified, every other widget task is built on assumption.
-
-   Concrete steps (see
-   [`docs/verifying-examples.md`](./docs/verifying-examples.md) for
-   the full walkthrough):
-   ```bash
-   make install-verify   # one-time; pulls in ESPHome (~200MB)
-   make verify           # runs `esphome config` against examples/*.yaml
-   ```
-   Or via pipenv: `pipenv install --dev && pipenv run verify`.
-
-   Report failures with the file name + full error block and we can
-   fix the widget structure in one pass. No hardware needed for this
-   step — `esphome config` only validates YAML, it doesn't compile.
+1. ~~**Compile every example with `esphome config`.**~~  **DONE.**
+   Verified against ESPHome 2026.4.0. The LilyGo device example
+   passes (`INFO Configuration is valid!`); the 5 package-preview
+   examples are correctly skipped because they don't define their
+   own `display:` block. `make verify` is now a strict gate.
 
 2. **Flash `examples/lilygo-t-display-amoled.yaml` to the LilyGo
    board.** This is the first real hardware target — pin map is
@@ -349,9 +337,19 @@ end-to-end.
 
 Items that don't fit a single section:
 
-- [ ] Run every example through `esphome config` on a real ESPHome
-      install (CI does this best-effort with `|| true`; needs a
-      strict mode once the LVGL merge patterns are confirmed).
+- [x] Run every example through `esphome config` on a real ESPHome
+      install. Confirmed against ESPHome 2026.4.0 — the LilyGo
+      device example passes (`INFO Configuration is valid!`). CI now
+      uses a strict `tools/verify_examples.py` that fails the build
+      on any DEVICE-category example error.
+- [ ] **Landscape rotation on LilyGo AMOLED.** ESPHome 2026.4.0
+      rejects `rotation:` on both the `display:` block (when bound to
+      LVGL) and on individual entries in `lvgl: displays:` (it wants
+      a list of plain id strings). The example currently uses the
+      portrait `tall_240x536` layout. Need to figure out whether
+      `lvgl:` accepts a top-level `rotation:`, or whether qspi_dbi
+      supports a `transform:` block. Once solved, switch the example
+      and consumer-repo template back to `wide_536x240.yaml`.
 - [ ] Add a `tests/test_examples.py` that asserts each
       `examples/*.yaml` resolves all its substitutions.
 - [ ] Add `pre-commit` config wiring `yamllint`, `ruff`, and

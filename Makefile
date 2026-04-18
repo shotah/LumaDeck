@@ -73,17 +73,18 @@ check: lint validate test
 ci: check
 
 ## verify : Run `esphome config` against every examples/*.yaml.
-# Cross-shell loop in Python so it works the same on Windows / Linux /
-# macOS. Requires `make install-verify` first. See
+# Cross-shell Python loop. Requires `make install-verify` first. See
 # docs/verifying-examples.md for what the output should look like.
+#
+# Behaviour:
+#  * Materialises examples/secrets.yaml from secrets.example.yaml if
+#    missing, so `!secret wifi_ssid` etc. resolve.
+#  * Skips files that don't define a top-level `display:` block --
+#    those are "package preview" examples without hardware drivers
+#    and aren't expected to validate end-to-end. They're reported as
+#    SKIP, not FAIL.
 verify:
-	@$(PY) -c "import glob, subprocess, sys; \
-files = sorted(glob.glob('examples/*.yaml')); \
-fails = []; \
-[print(f'\n== {f} ==') or (subprocess.call(['esphome', 'config', f]) and fails.append(f)) for f in files]; \
-print(); \
-print(f'{len(fails)} of {len(files)} example(s) failed: {fails}' if fails else f'all {len(files)} example(s) resolved'); \
-sys.exit(1 if fails else 0)"
+	@$(PY) tools/verify_examples.py
 
 ## list-themes : List built-in themes.
 list-themes:

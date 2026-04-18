@@ -64,14 +64,48 @@ From the repo root:
 make verify
 ```
 
-This runs `esphome config` against every file in `examples/` and
-reports a pass/fail count at the end.
+This runs `esphome config` against every **device** example in
+`examples/` and reports a pass / skip / fail count at the end.
+
+### Device vs package-preview examples
+
+The verifier categorises files into two buckets based on whether
+they define a top-level `display:` block:
+
+* **DEVICE** — has a `display:` block. Validated. Today only
+  `examples/lilygo-t-display-amoled.yaml` falls here.
+* **PREVIEW** — no `display:` block. *Skipped*, not failed. These
+  are LumaDeck-package previews (`media-remote.yaml`,
+  `room-controller.yaml`, etc.) that show how to wire packages
+  together but rely on a consumer-supplied driver block to actually
+  compile.
+
+The implementation lives in
+[`tools/verify_examples.py`](../tools/verify_examples.py) and is
+intentionally short — a few dozen lines of Python.
 
 To check a single file:
 
 ```bash
 esphome config examples/round-clock.yaml
 ```
+
+### About `examples/secrets.yaml`
+
+ESPHome resolves `!secret wifi_ssid` etc. by looking for a
+`secrets.yaml` next to the file being processed. To keep `make verify`
+zero-touch:
+
+* `examples/secrets.example.yaml` is **committed**. It contains
+  obvious placeholder strings — they're safe to commit and exist
+  purely to let `esphome config` resolve secrets during validation.
+* `examples/secrets.yaml` is **gitignored**. `make verify` copies the
+  template to this path on first run so ESPHome can find it.
+
+These placeholders are **not valid for actually flashing hardware**.
+For a real build, copy `secrets.example.yaml` into your consumer repo
+(or use the template at `consumer-repo-template/secrets.example.yaml`)
+and fill in your real wifi credentials there.
 
 ## What success looks like
 

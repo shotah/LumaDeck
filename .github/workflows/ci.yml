@@ -44,13 +44,10 @@ jobs:
       - name: Install ESPHome
         run: python -m pip install esphome
 
-      - name: esphome config (examples)
-        # Examples include hardware-specific blocks that live in the
-        # consumer repo, so they aren't expected to compile here. We
-        # just verify YAML loads and the package contract resolves.
-        run: |
-          for f in examples/*.yaml; do
-            echo "::group::$f"
-            esphome config "$f" || true
-            echo "::endgroup::"
-          done
+      - name: esphome config (device examples)
+        # tools/verify_examples.py bootstraps placeholder secrets and
+        # only runs `esphome config` against examples that define a
+        # top-level `display:` block. Package-preview examples are
+        # skipped (they need consumer-supplied driver blocks to
+        # actually compile).
+        run: python tools/verify_examples.py

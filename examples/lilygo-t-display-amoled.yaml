@@ -34,10 +34,9 @@ packages:
   ha:      !include ../packages/ha.yaml
   nav:     !include ../packages/nav.yaml
   touch:   !include ../packages/touch.yaml
-  # Landscape mounting (default). Pair with `rotation: 90` on the
-  # display block below. For portrait, swap to
-  # `!include ../layouts/tall_240x536.yaml` and remove the rotation.
-  layout:  !include ../layouts/wide_536x240.yaml
+  # Portrait native (240x536). Switch to wide_536x240.yaml once
+  # rotation is figured out — see todo.md §11.
+  layout:  !include ../layouts/tall_240x536.yaml
   status:  !include ../widgets/status_bar.yaml
   clock:   !include ../widgets/clock.yaml
   navtabs: !include ../widgets/nav_tabs.yaml
@@ -80,15 +79,23 @@ display:
     cs_pin: GPIO6
     reset_pin: GPIO17
     enable_pin: GPIO38   # PMIC enable (AMOLED_191 PMICEnPins)
-    # Native panel resolution is always 240 x 536 (portrait). The
-    # `rotation:` below tells the driver to render landscape; LVGL
-    # then sees a 536 x 240 canvas matching layouts/wide_536x240.yaml.
+    # Native panel resolution is always 240 x 536 (portrait).
+    # Rotation lives in the `lvgl:` block below (ESPHome rejects
+    # `rotation:` on the display when it's bound to LVGL).
     dimensions:
       width: 240
       height: 536
-    rotation: 90
     auto_clear_enabled: false
     update_interval: never
+
+# Bind the display to LVGL. (Rotation is a follow-up — the
+# qspi_dbi/LVGL combo on ESPHome 2026.4 doesn't accept rotation on
+# either the display or LVGL display list. Tracking under §11 of
+# todo.md. For now this validates in native portrait orientation;
+# swap to layouts/tall_240x536.yaml above to match.)
+lvgl:
+  displays:
+    - lum_display
 
 # I2C bus for the CST816T touch controller (touch version only).
 i2c:

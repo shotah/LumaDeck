@@ -31,6 +31,30 @@ project adheres to [Semantic Versioning](https://semver.org/).
   README walking through the workflow.
 * `manifest.yaml` now lists `reference_hardware:` so a future
   installer / registry can discover supported panels.
+* `examples/secrets.example.yaml` — committed placeholder secrets so
+  `esphome config` (and `make verify`) can resolve `!secret` calls
+  without anyone editing real credentials. `make verify` materialises
+  `examples/secrets.yaml` (gitignored) from this template on first
+  run. CI does the same.
+* `tools/verify_examples.py` — drives `make verify` (and the Pipenv
+  `verify` script + the CI workflow). Categorises files into DEVICE
+  (has `display:` block, gets validated) vs PREVIEW (skipped with
+  explanatory note), so the package-only examples don't false-fail.
+
+### Verified
+
+* **`esphome config` passes** for the LilyGo T-Display-S3 AMOLED
+  example on ESPHome 2026.4.0. Confirms `!extend page-id`, the
+  `qspi_dbi`/RM67162 driver, the `cst816` touch platform, and every
+  widget's LVGL syntax all work end-to-end.
+
+### Known limitations
+
+* Landscape rotation on the LilyGo AMOLED is deferred — ESPHome
+  2026.4.0 rejects `rotation:` on both the `display:` block (when
+  bound to LVGL) and on entries in `lvgl: displays:`. The example
+  uses portrait `tall_240x536.yaml` until the right rotation syntax
+  is identified. Tracked in `todo.md` §11.
 
 ### Changed
 
