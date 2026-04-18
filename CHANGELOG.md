@@ -51,6 +51,23 @@ project adheres to [Semantic Versioning](https://semver.org/).
   on a single device (visually it's a mess, but every widget's YAML
   is verified to parse against ESPHome's LVGL schema).
 
+### Touch gestures
+
+* `packages/touch.yaml` → v0.2.0. Software swipe detection.
+  Three new scripts (`lum_touch_press` / `lum_touch_update` /
+  `lum_touch_release`) consume raw touchscreen callbacks and
+  dispatch horizontal swipes to `nav_next_page` / `nav_prev_page`.
+  Configurable via `${swipe_min_dist}` (default 60 px) and
+  `${swipe_max_time_ms}` (default 500 ms). Vertical swipes are
+  reserved for v0.3.
+* New `docs/touch-gestures.md` with the consumer wiring template
+  and tuning notes.
+* Both `examples/lilygo-t-display-amoled.yaml` and
+  `consumer-repo-template/device.yaml` now wire `on_touch` /
+  `on_update` / `on_release` into the new scripts. Legacy
+  `touch_mark_active` / `touch_mark_idle` aliases retained so
+  pre-0.2 device YAMLs don't break.
+
 ### Widget upgrades
 
 * `widgets/analog_clock.yaml` → v0.2.0. Hand rotation now actually
@@ -71,13 +88,26 @@ project adheres to [Semantic Versioning](https://semver.org/).
   step (8 × 25 ms ≈ 200 ms each way; all timings tunable via
   `${toast_anim_steps}` / `${toast_step_ms}`).
 
-### Known limitations
+### Hardware-confirmed and fixed
 
-* Landscape rotation on the LilyGo AMOLED is deferred — ESPHome
-  2026.4.0 rejects `rotation:` on both the `display:` block (when
-  bound to LVGL) and on entries in `lvgl: displays:`. The example
-  uses portrait `tall_240x536.yaml` until the right rotation syntax
-  is identified. Tracked in `todo.md` §11.
+* **LumaDeck verified running on the LilyGo T-Display-S3 AMOLED.**
+  First-pass issues from the bring-up:
+  * **Landscape rotation now works.** ESPHome's LVGL component
+    accepts `rotation:` as a top-level key (`lvgl: rotation: 90`),
+    NOT on the `display:` block or on entries in `lvgl: displays:`.
+    Touchscreen coordinates are auto-rotated. The lilygo example
+    and consumer-repo template default to landscape
+    (`wide_536x240.yaml`); switch to `tall_240x536.yaml` and drop
+    the `rotation:` line for portrait.
+  * **Text now scales for the 1.91" panel.** Both
+    `layouts/wide_536x240.yaml` and `layouts/tall_240x536.yaml`
+    override the theme font sizes (xl 56, lg 36, md 24, sm 18,
+    icon 28) so text is readable at arm's length. Establishes the
+    pattern: layouts MAY override theme font_size_* substitutions
+    when the physical screen needs different sizing.
+* `widgets/analog_clock.yaml` switched from `transform_angle` to
+  `transform_rotation` (the older property name is deprecated in
+  ESPHome 2026.x per the LVGL component docs).
 
 ### Changed
 

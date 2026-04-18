@@ -11,7 +11,17 @@ substitutions:
   screen_h:       "240"
   screen_shape:   "wide"
   screen_radius:  "0"
-  scale:          "0.85"
+  scale:          "1.0"
+
+  # The 1.91" AMOLED has a high pixel density; the theme defaults are
+  # physically tiny on this panel. Bump font sizes so text is readable
+  # at arm's length. Override per-device by setting these in the
+  # consumer YAML's top-level substitutions block.
+  font_size_xl:   "56"
+  font_size_lg:   "36"
+  font_size_md:   "24"
+  font_size_sm:   "18"
+  font_size_icon: "28"
 
 lvgl:
   pages:

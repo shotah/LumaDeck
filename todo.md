@@ -39,20 +39,9 @@ the widgets behind those contracts to actually work end-to-end.
    examples are correctly skipped because they don't define their
    own `display:` block. `make verify` is now a strict gate.
 
-2. **Flash `examples/lilygo-t-display-amoled.yaml` to the LilyGo
-   board.** This is the first real hardware target — pin map is
-   taken verbatim from the upstream
-   [LilyGo-AMOLED-Series](https://github.com/Xinyuan-LilyGO/LilyGo-AMOLED-Series)
-   library and uses ESPHome's stock `qspi_dbi` (RM67162) and `cst816`
-   platforms. From the consumer-repo template:
-   ```bash
-   cp -r consumer-repo-template/ ../my-amoled-firmware/
-   cd ../my-amoled-firmware
-   cp secrets.example.yaml secrets.yaml   # edit wifi creds
-   esphome run device.yaml
-   ```
-   Anything that misbehaves on real LVGL on this panel becomes the
-   highest-priority fix.
+2. ~~**Flash `examples/lilygo-t-display-amoled.yaml` to the LilyGo
+   board.**~~  **DONE.** Confirmed working. First-pass issues
+   (text too small, landscape mode missing) are addressed in §11.
 
 ### P1 — functional gaps in the v0.1 widget set
 
@@ -78,10 +67,15 @@ the widgets behind those contracts to actually work end-to-end.
 
 ### P2 — close out v0.2
 
-6. **Touch gestures** in `packages/touch.yaml` — wire swipe-left /
-   swipe-right to `nav_next_page` / `nav_prev_page` from
-   `packages/nav.yaml`. Multi-page UIs aren't usable without this on
-   touch panels.
+6. ~~**Touch gestures** in `packages/touch.yaml`.~~  **DONE.**
+   `packages/touch.yaml` v0.2.0 ships software swipe detection:
+   `lum_touch_press` / `lum_touch_update` / `lum_touch_release`
+   scripts, fed by the consumer's `touchscreen:` callbacks, dispatch
+   to `nav_next_page` / `nav_prev_page` when a horizontal swipe
+   exceeds `${swipe_min_dist}` (default 60 px) within
+   `${swipe_max_time_ms}` (default 500 ms). Wiring template +
+   tuning notes in `docs/touch-gestures.md`. Wired into the LilyGo
+   example and consumer-repo-template.
 7. **Icon font rendering** — `font_icon` is declared but no widget
    actually uses it. Add an icon glyph to `nav_tabs.yaml` buttons as
    the first consumer.
@@ -309,12 +303,16 @@ end-to-end.
 - [x] brightness ring slider
 - [x] page navigation / nav tabs
 - [x] `icon_grid` widget
+- [x] Touch gestures abstraction — `packages/touch.yaml` v0.2.0 has
+      software swipe detection wired to `nav_next_page` /
+      `nav_prev_page`. See `docs/touch-gestures.md`.
 - [ ] **Icon font** — `packages/fonts.yaml` declares `font_icon` from
       Material Symbols Outlined but no widget actually renders
       icon glyphs yet.
-- [ ] **Touch gestures abstraction** — `packages/touch.yaml` defines
-      activity flags only. Need swipe-to-page-next/prev wired through
-      `packages/nav.yaml`.
+- [ ] **Edge-only swipe gestures** (v0.3 follow-up). Today swipes
+      can fire mid-slider-drag if the user crosses the threshold;
+      restricting swipes to `region_left` / `region_right` start
+      points would eliminate the conflict entirely.
 
 ### v0.3 — partial
 
@@ -351,14 +349,22 @@ Items that don't fit a single section:
       device example passes (`INFO Configuration is valid!`). CI now
       uses a strict `tools/verify_examples.py` that fails the build
       on any DEVICE-category example error.
-- [ ] **Landscape rotation on LilyGo AMOLED.** ESPHome 2026.4.0
-      rejects `rotation:` on both the `display:` block (when bound to
-      LVGL) and on individual entries in `lvgl: displays:` (it wants
-      a list of plain id strings). The example currently uses the
-      portrait `tall_240x536` layout. Need to figure out whether
-      `lvgl:` accepts a top-level `rotation:`, or whether qspi_dbi
-      supports a `transform:` block. Once solved, switch the example
-      and consumer-repo template back to `wide_536x240.yaml`.
+- [x] Verified on hardware: the LilyGo T-Display-S3 AMOLED actually
+      runs LumaDeck. First reported issues (text too small in
+      portrait, no landscape mode) are addressed below.
+- [x] **Landscape rotation on LilyGo AMOLED.** Resolved. The right
+      syntax is `lvgl: rotation: 90` at the top of the LVGL block
+      (NOT on the display: block, NOT on entries in lvgl: displays:).
+      LVGL auto-rotates touchscreen coordinates to match. Documented
+      in the ESPHome LVGL component page under "Display Rotation".
+      The lilygo example + consumer-repo template are now landscape
+      (`wide_536x240.yaml`) by default.
+- [x] **Font sizes scaled for the 1.91" AMOLED.** The theme defaults
+      (xl 48, lg 28, md 18, sm 14) are physically tiny on a 1.91"
+      panel. Both `wide_536x240.yaml` and `tall_240x536.yaml` now
+      override font_size_* (xl 56, lg 36, md 24, sm 18, icon 28).
+      Pattern is reusable: any layout can override theme font sizes
+      when the physical screen needs different sizing.
 - [ ] Add a `tests/test_examples.py` that asserts each
       `examples/*.yaml` resolves all its substitutions.
 - [ ] Add `pre-commit` config wiring `yamllint`, `ruff`, and

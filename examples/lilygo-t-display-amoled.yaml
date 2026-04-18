@@ -34,9 +34,11 @@ packages:
   ha:      !include ../packages/ha.yaml
   nav:     !include ../packages/nav.yaml
   touch:   !include ../packages/touch.yaml
-  # Portrait native (240x536). Switch to wide_536x240.yaml once
-  # rotation is figured out — see todo.md §11.
-  layout:  !include ../layouts/tall_240x536.yaml
+  # Landscape mounting (default). LVGL handles rotation in the
+  # `lvgl:` block at the bottom — both the framebuffer and touch
+  # coordinates get auto-rotated. Swap to tall_240x536.yaml + drop
+  # the `rotation:` line below for portrait.
+  layout:  !include ../layouts/wide_536x240.yaml
   status:  !include ../widgets/status_bar.yaml
   clock:   !include ../widgets/clock.yaml
   navtabs: !include ../widgets/nav_tabs.yaml
@@ -88,12 +90,11 @@ display:
     auto_clear_enabled: false
     update_interval: never
 
-# Bind the display to LVGL. (Rotation is a follow-up — the
-# qspi_dbi/LVGL combo on ESPHome 2026.4 doesn't accept rotation on
-# either the display or LVGL display list. Tracking under §11 of
-# todo.md. For now this validates in native portrait orientation;
-# swap to layouts/tall_240x536.yaml above to match.)
+# Bind the display to LVGL and rotate to landscape. ESPHome's LVGL
+# component handles rotation centrally (NOT on the display: block) —
+# touchscreen coordinates get auto-rotated to match.
 lvgl:
+  rotation: 90
   displays:
     - lum_display
 
@@ -110,8 +111,24 @@ touchscreen:
     i2c_id: bus_a
     interrupt_pin: GPIO21
     # No dedicated reset pin on this board; touch shares display reset.
+    # Wire press / update / release into packages/touch.yaml so swipe
+    # gestures dispatch to nav_next_page / nav_prev_page automatically.
     on_touch:
-      - script.execute: touch_mark_active
+      - script.execute:
+          id: lum_touch_press
+          x: !lambda 'return touch.x;'
+          y: !lambda 'return touch.y;'
+    on_update:
+      - if:
+          condition:
+            lambda: 'return !touches.empty();'
+          then:
+            - script.execute:
+                id: lum_touch_update
+                x: !lambda 'return touches[0].x;'
+                y: !lambda 'return touches[0].y;'
+    on_release:
+      - script.execute: lum_touch_release
 
 # Boot button doubles as a manual page-cycle.
 binary_sensor:

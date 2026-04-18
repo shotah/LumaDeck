@@ -9,7 +9,17 @@ substitutions:
   screen_h:       "536"
   screen_shape:   "tall"
   screen_radius:  "0"
-  scale:          "0.85"
+  scale:          "1.0"
+
+  # Same physical panel as wide_536x240; bump the theme defaults so
+  # text is readable at arm's length on a 1.91-inch display. Override
+  # per-device by setting these in the consumer YAML's top-level
+  # substitutions block.
+  font_size_xl:   "56"
+  font_size_lg:   "36"
+  font_size_md:   "24"
+  font_size_sm:   "18"
+  font_size_icon: "28"
 
 lvgl:
   pages:

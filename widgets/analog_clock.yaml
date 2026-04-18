@@ -88,15 +88,17 @@ interval:
   - interval: 1s
     then:
       # All angles are in 0.1-degree units (LVGL convention).
+      # Property name is `transform_rotation` (ESPHome 2026.x);
+      # `transform_angle` is the older deprecated alias.
       - lvgl.widget.update:
           id: lum_analog_hour
-          transform_angle: !lambda |-
+          transform_rotation: !lambda |-
             auto t = id(ha_time).now();
             int h = t.hour % 12;
             return h * 300 + t.minute * 5;
       - lvgl.widget.update:
           id: lum_analog_min
-          transform_angle: !lambda |-
+          transform_rotation: !lambda |-
             auto t = id(ha_time).now();
             return t.minute * 60 + t.second;
       - if:
@@ -105,5 +107,5 @@ interval:
           then:
             - lvgl.widget.update:
                 id: lum_analog_sec
-                transform_angle: !lambda |-
+                transform_rotation: !lambda |-
                   return id(ha_time).now().second * 60;

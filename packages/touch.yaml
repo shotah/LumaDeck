@@ -1,17 +1,54 @@
 # ---------------------------------------------------------------
 # package: touch
-# Touch-input abstraction. The actual `touchscreen:` platform belongs
-# in the consumer device YAML (it depends on the touch IC: GT911,
-# CST816, FT6336, etc.).
+# version: 0.2.0
+# Touch-input abstraction + software swipe detection.
 #
-# This package defines:
-#   * binary_sensor templates that widgets can bind on_press / on_release
-#   * a global flag `lum_touch_active` other widgets can read
+# The actual `touchscreen:` platform (GT911, CST816, FT6336, ...) is
+# hardware-specific and lives in the consumer device YAML. This
+# package supplies the cross-cutting state tracking and gesture
+# logic that any touch driver can plug into.
 #
-# Consumer YAML is expected to provide a touchscreen with id
-# `lum_touchscreen`. If no touch hardware exists, including this
-# package is a no-op.
+# Consumer wiring (paste into your device YAML next to
+# `touchscreen:`):
+#
+#     touchscreen:
+#       - platform: <your_touch_ic>
+#         id: lum_touchscreen
+#         ...
+#         on_touch:
+#           - script.execute:
+#               id: lum_touch_press
+#               x: !lambda 'return touch.x;'
+#               y: !lambda 'return touch.y;'
+#         on_update:
+#           - if:
+#               condition:
+#                 lambda: 'return !touches.empty();'
+#               then:
+#                 - script.execute:
+#                     id: lum_touch_update
+#                     x: !lambda 'return touches[0].x;'
+#                     y: !lambda 'return touches[0].y;'
+#         on_release:
+#           - script.execute: lum_touch_release
+#
+# Default behaviour: a horizontal swipe longer than `${swipe_min_dist}`
+# px completed in under `${swipe_max_time_ms}` ms triggers
+# `nav_next_page` (swipe left) or `nav_prev_page` (swipe right) from
+# `packages/nav.yaml`. Override the substitutions to retune.
+#
+# Known limitation: swipes also fire when the user drags an LVGL
+# widget (slider/arc) past the threshold. The high default threshold
+# (60 px on a 240 px screen) makes this rare. Edge-only swipe
+# gestures are tracked under todo.md as a v0.3 follow-up.
 # ---------------------------------------------------------------
+
+substitutions:
+  # Minimum distance (px) for a swipe to register.
+  swipe_min_dist:    "60"
+  # Maximum gesture duration (ms). Slower drags are treated as
+  # widget interactions, not swipes.
+  swipe_max_time_ms: "500"
 
 globals:
   - id: lum_touch_active
@@ -19,22 +56,95 @@ globals:
     restore_value: no
     initial_value: "false"
 
+  - id: lum_touch_start_x
+    type: int
+    restore_value: no
+    initial_value: "0"
+
+  - id: lum_touch_start_y
+    type: int
+    restore_value: no
+    initial_value: "0"
+
+  - id: lum_touch_start_ms
+    type: uint32_t
+    restore_value: no
+    initial_value: "0"
+
+  - id: lum_touch_last_x
+    type: int
+    restore_value: no
+    initial_value: "0"
+
+  - id: lum_touch_last_y
+    type: int
+    restore_value: no
+    initial_value: "0"
+
   - id: lum_last_touch_ms
     type: uint32_t
     restore_value: no
     initial_value: "0"
 
 script:
+  # Called from touchscreen `on_touch:`. Records the gesture origin.
+  - id: lum_touch_press
+    parameters:
+      x: int
+      y: int
+    then:
+      - lambda: |-
+          id(lum_touch_active)   = true;
+          id(lum_touch_start_x)  = x;
+          id(lum_touch_start_y)  = y;
+          id(lum_touch_last_x)   = x;
+          id(lum_touch_last_y)   = y;
+          id(lum_touch_start_ms) = millis();
+          id(lum_last_touch_ms)  = millis();
+
+  # Called from touchscreen `on_update:`. Tracks the latest touch
+  # coordinate so `on_release` knows where the finger ended.
+  - id: lum_touch_update
+    parameters:
+      x: int
+      y: int
+    then:
+      - lambda: |-
+          id(lum_touch_last_x)  = x;
+          id(lum_touch_last_y)  = y;
+          id(lum_last_touch_ms) = millis();
+
+  # Called from touchscreen `on_release:`. Computes the gesture
+  # delta and dispatches a swipe -> nav action if it qualifies.
+  - id: lum_touch_release
+    then:
+      - lambda: |-
+          id(lum_touch_active) = false;
+          int dx = id(lum_touch_last_x) - id(lum_touch_start_x);
+          int dy = id(lum_touch_last_y) - id(lum_touch_start_y);
+          uint32_t dt = millis() - id(lum_touch_start_ms);
+          if (dt > ${swipe_max_time_ms}) return;
+          int adx = dx < 0 ? -dx : dx;
+          int ady = dy < 0 ? -dy : dy;
+          if (adx > ady && adx > ${swipe_min_dist}) {
+            if (dx < 0) {
+              id(nav_next_page).execute();
+            } else {
+              id(nav_prev_page).execute();
+            }
+          }
+          // Vertical swipes are reserved for v0.3
+          // (could trigger pull-to-refresh, dismiss toast, etc.).
+
+  # ---- legacy aliases (v0.1 API) --------------------------------
+  # Older device YAMLs called `touch_mark_active` / `touch_mark_idle`
+  # instead of the new press/release scripts. Kept as no-op aliases
+  # so they don't break; new code should use lum_touch_press /
+  # lum_touch_release.
   - id: touch_mark_active
     then:
-      - globals.set:
-          id: lum_touch_active
-          value: "true"
-      - lambda: |-
-          id(lum_last_touch_ms) = millis();
+      - lambda: 'id(lum_touch_active) = true; id(lum_last_touch_ms) = millis();'
 
   - id: touch_mark_idle
     then:
-      - globals.set:
-          id: lum_touch_active
-          value: "false"
+      - lambda: 'id(lum_touch_active) = false;'
