@@ -1,0 +1,64 @@
+# ---------------------------------------------------------------
+# layout: wide_536x240
+# 536 x 240 landscape display. Same physical panel as
+# layouts/tall_240x536.yaml (LilyGo T-Display-S3 AMOLED, 1.91"),
+# but mounted / rotated 90 degrees. The consumer device YAML must
+# set `rotation: 90` (or 270) on the display: block to match.
+# ---------------------------------------------------------------
+
+substitutions:
+  screen_w:       "536"
+  screen_h:       "240"
+  screen_shape:   "wide"
+  screen_radius:  "0"
+  scale:          "0.85"
+
+lvgl:
+  pages:
+    - id: home_page
+      bg_color: ${bg}
+      widgets:
+        - obj:
+            id: region_top
+            align: TOP_MID
+            width: ${screen_w}
+            height: 28
+            bg_opa: TRANSP
+            border_width: 0
+        - obj:
+            id: region_center
+            align: CENTER
+            width: 1
+            height: 1
+            bg_opa: TRANSP
+            border_width: 0
+        - obj:
+            id: region_bottom
+            align: BOTTOM_MID
+            width: ${screen_w}
+            height: 48
+            bg_opa: TRANSP
+            border_width: 0
+        - obj:
+            id: region_left
+            align: LEFT_MID
+            width: 1
+            height: ${screen_h}
+            bg_opa: TRANSP
+            border_width: 0
+        - obj:
+            id: region_right
+            align: RIGHT_MID
+            width: 1
+            height: ${screen_h}
+            bg_opa: TRANSP
+            border_width: 0
+
+    - id: media_page
+      bg_color: ${bg}
+    - id: lights_page
+      bg_color: ${bg}
+    - id: climate_page
+      bg_color: ${bg}
+    - id: settings_page
+      bg_color: ${bg}

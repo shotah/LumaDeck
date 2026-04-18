@@ -1,0 +1,71 @@
+# ---------------------------------------------------------------
+# example: waveshare-1.85c
+# Reference build for the Waveshare ESP32-S3-Touch-LCD-1.85C
+# (round 360x360, capacitive touch).
+#
+# This is the closest thing to what the SEPARATE hardware repo will
+# look like. Everything above the `# ---- hardware ----` line is
+# pure LumaDeck. Everything below is panel-specific and intentionally
+# does NOT live inside the LumaDeck package.
+#
+# References:
+#   https://www.waveshare.com/esp32-s3-touch-lcd-1.85c.htm
+#   https://docs.waveshare.com/ESP32-S3-Touch-LCD-1.85C
+# ---------------------------------------------------------------
+
+substitutions:
+  device_name:      "waveshare_round"
+  device_friendly:  "Waveshare 1.85 Round"
+  ha_media_player:  "media_player.living_room"
+
+packages:
+  core:    !include ../packages/core.yaml
+  board:   !include ../packages/board_esp32s3.yaml
+  theme:   !include ../themes/dark.yaml
+  fonts:   !include ../packages/fonts.yaml
+  colors:  !include ../packages/colors.yaml
+  display: !include ../packages/display.yaml
+  ha:      !include ../packages/ha.yaml
+  nav:     !include ../packages/nav.yaml
+  touch:   !include ../packages/touch.yaml
+  layout:  !include ../layouts/round_360.yaml
+  status:  !include ../widgets/status_bar.yaml
+  clock:   !include ../widgets/clock.yaml
+  navtabs: !include ../widgets/nav_tabs.yaml
+  media:   !include ../widgets/media_card.yaml
+  toast:   !include ../widgets/notification_toast.yaml
+
+# ---- hardware (lives in consumer repo, not in LumaDeck) ----
+# The 1.85" round panel uses an ST77916 driver over QSPI and a CST816
+# capacitive touch controller over I2C. ESPHome support for these
+# specific ICs evolves; check the LumaDeck "consumer repo guide" for
+# the current recommended driver block.
+#
+# i2c:
+#   - id: bus_a
+#     sda: GPIO11
+#     scl: GPIO10
+#
+# touchscreen:
+#   - platform: cst816
+#     id: lum_touchscreen
+#     i2c_id: bus_a
+#     interrupt_pin: GPIO4
+#     reset_pin: GPIO5
+#
+# spi:
+#   - id: lcd_spi
+#     type: quad
+#     clk_pin: GPIO40
+#     data_pins: [GPIO46, GPIO45, GPIO42, GPIO41]
+#
+# display:
+#   - platform: <st77916-driver-when-available>
+#     id: lum_display
+#     spi_id: lcd_spi
+#     cs_pin: GPIO21
+#     reset_pin: GPIO39
+#     dimensions:
+#       width: 360
+#       height: 360
+#     auto_clear_enabled: false

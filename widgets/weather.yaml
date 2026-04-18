@@ -1,0 +1,68 @@
+# ---------------------------------------------------------------
+# widget: weather
+# version: 0.1.0
+# reads:        ${bg_alt} ${fg} ${fg_muted} ${accent} ${font_lg} ${font_sm}
+# targets:      home_page
+# exposes:      lum_weather_root lum_weather_temp lum_weather_cond
+# ha_entities:  ${ha_weather}
+# ha_services:  none
+# requires:     packages/ha.yaml
+# ---------------------------------------------------------------
+
+sensor:
+  - platform: homeassistant
+    id: lum_weather_temp_src
+    entity_id: ${ha_weather}
+    attribute: temperature
+    on_value:
+      - lvgl.label.update:
+          id: lum_weather_temp
+          text: !lambda |-
+            char buf[16];
+            snprintf(buf, sizeof(buf), "%.0f°", x);
+            return std::string(buf);
+
+text_sensor:
+  - platform: homeassistant
+    id: lum_weather_cond_src
+    entity_id: ${ha_weather}
+    on_value:
+      - lvgl.label.update:
+          id: lum_weather_cond
+          text: !lambda 'return x.c_str();'
+
+lvgl:
+  pages:
+    - id: !extend home_page
+      widgets:
+        - obj:
+            id: lum_weather_root
+            align_to:
+              id: region_top
+              align: CENTER
+              y: 36
+            width: 180
+            height: 64
+            bg_color: ${bg_alt}
+            border_color: ${border}
+            border_width: ${border_w}
+            radius: ${radius_md}
+            pad_all: ${pad_sm}
+            layout:
+              type: FLEX
+              flex_flow: ROW
+              flex_align_main: SPACE_BETWEEN
+              flex_align_cross: CENTER
+            widgets:
+              - label:
+                  id: lum_weather_temp
+                  text_color: ${fg}
+                  text_font: font_lg
+                  text: "--°"
+              - label:
+                  id: lum_weather_cond
+                  text_color: ${fg_muted}
+                  text_font: font_sm
+                  text: "--"
+                  long_mode: DOT
+                  width: 90

@@ -1,0 +1,129 @@
+# ---------------------------------------------------------------
+# widget: icon_grid
+# version: 0.1.0
+# reads:        ${bg_alt} ${fg} ${accent} ${border} ${font_md}
+# targets:      home_page
+# exposes:      lum_icongrid_root + lum_icongrid_btn_<n>
+# ha_entities:  none (intended to be wired to scripts/scenes by consumer)
+# ha_services:  none
+# config:       ${icongrid_cols:-3} ${icongrid_rows:-2}
+#               ${icongrid_label_1..6:-Btn N}
+#
+# A configurable NxM scene/action grid. Six slots are pre-defined; the
+# consumer device YAML wires each lum_icongrid_btn_<n>'s on_click to
+# whatever script or HA service it wants. Override labels via
+# substitutions.
+# ---------------------------------------------------------------
+
+substitutions:
+  icongrid_cols:    "3"
+  icongrid_rows:    "2"
+  icongrid_label_1: "Lights"
+  icongrid_label_2: "Music"
+  icongrid_label_3: "Movie"
+  icongrid_label_4: "Bed"
+  icongrid_label_5: "Away"
+  icongrid_label_6: "All Off"
+
+lvgl:
+  pages:
+    - id: !extend home_page
+      widgets:
+        - obj:
+            id: lum_icongrid_root
+            align: CENTER
+            width: 300
+            height: 200
+            bg_opa: TRANSP
+            border_width: 0
+            pad_all: ${pad_sm}
+            layout:
+              type: FLEX
+              flex_flow: ROW_WRAP
+              flex_align_main: SPACE_EVENLY
+              flex_align_cross: CENTER
+            widgets:
+              - button:
+                  id: lum_icongrid_btn_1
+                  width: 84
+                  height: 84
+                  bg_color: ${bg_alt}
+                  border_color: ${border}
+                  border_width: ${border_w}
+                  radius: ${radius_md}
+                  widgets:
+                    - label:
+                        align: CENTER
+                        text_color: ${fg}
+                        text_font: font_md
+                        text: ${icongrid_label_1}
+              - button:
+                  id: lum_icongrid_btn_2
+                  width: 84
+                  height: 84
+                  bg_color: ${bg_alt}
+                  border_color: ${border}
+                  border_width: ${border_w}
+                  radius: ${radius_md}
+                  widgets:
+                    - label:
+                        align: CENTER
+                        text_color: ${fg}
+                        text_font: font_md
+                        text: ${icongrid_label_2}
+              - button:
+                  id: lum_icongrid_btn_3
+                  width: 84
+                  height: 84
+                  bg_color: ${bg_alt}
+                  border_color: ${border}
+                  border_width: ${border_w}
+                  radius: ${radius_md}
+                  widgets:
+                    - label:
+                        align: CENTER
+                        text_color: ${fg}
+                        text_font: font_md
+                        text: ${icongrid_label_3}
+              - button:
+                  id: lum_icongrid_btn_4
+                  width: 84
+                  height: 84
+                  bg_color: ${bg_alt}
+                  border_color: ${border}
+                  border_width: ${border_w}
+                  radius: ${radius_md}
+                  widgets:
+                    - label:
+                        align: CENTER
+                        text_color: ${fg}
+                        text_font: font_md
+                        text: ${icongrid_label_4}
+              - button:
+                  id: lum_icongrid_btn_5
+                  width: 84
+                  height: 84
+                  bg_color: ${bg_alt}
+                  border_color: ${border}
+                  border_width: ${border_w}
+                  radius: ${radius_md}
+                  widgets:
+                    - label:
+                        align: CENTER
+                        text_color: ${fg}
+                        text_font: font_md
+                        text: ${icongrid_label_5}
+              - button:
+                  id: lum_icongrid_btn_6
+                  width: 84
+                  height: 84
+                  bg_color: ${bg_alt}
+                  border_color: ${border}
+                  border_width: ${border_w}
+                  radius: ${radius_md}
+                  widgets:
+                    - label:
+                        align: CENTER
+                        text_color: ${fg}
+                        text_font: font_md
+                        text: ${icongrid_label_6}

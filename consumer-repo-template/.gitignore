@@ -1,0 +1,14 @@
+# NEVER commit secrets.
+secrets.yaml
+
+# ESPHome build artifacts.
+.esphome/
+*.bin
+*.elf
+*.map
+
+# Editor cruft.
+.vscode/
+.idea/
+*.swp
+.DS_Store

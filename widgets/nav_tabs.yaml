@@ -1,0 +1,89 @@
+# ---------------------------------------------------------------
+# widget: nav_tabs
+# version: 0.1.0
+# reads:        ${bg_alt} ${fg} ${accent} ${border} ${font_sm}
+# targets:      home_page (anchored to region_bottom)
+# exposes:      lum_navtabs_root lum_navtabs_btn_home/media/lights/settings
+# ha_entities:  none
+# ha_services:  none
+# requires:     packages/nav.yaml
+# ---------------------------------------------------------------
+
+lvgl:
+  pages:
+    - id: !extend home_page
+      widgets:
+        - obj:
+            id: lum_navtabs_root
+            align_to:
+              id: region_bottom
+              align: CENTER
+            width: 280
+            height: 44
+            bg_color: ${bg_alt}
+            border_color: ${border}
+            border_width: ${border_w}
+            radius: ${radius_pill}
+            pad_all: ${pad_sm}
+            layout:
+              type: FLEX
+              flex_flow: ROW
+              flex_align_main: SPACE_EVENLY
+              flex_align_cross: CENTER
+            widgets:
+              - button:
+                  id: lum_navtabs_btn_home
+                  width: 60
+                  height: 32
+                  bg_opa: TRANSP
+                  border_width: 0
+                  on_click:
+                    - script.execute: nav_goto_home
+                  widgets:
+                    - label:
+                        align: CENTER
+                        text_color: ${fg}
+                        text_font: font_sm
+                        text: "home"
+              - button:
+                  id: lum_navtabs_btn_media
+                  width: 60
+                  height: 32
+                  bg_opa: TRANSP
+                  border_width: 0
+                  on_click:
+                    - script.execute: nav_goto_media
+                  widgets:
+                    - label:
+                        align: CENTER
+                        text_color: ${fg}
+                        text_font: font_sm
+                        text: "media"
+              - button:
+                  id: lum_navtabs_btn_lights
+                  width: 60
+                  height: 32
+                  bg_opa: TRANSP
+                  border_width: 0
+                  on_click:
+                    - script.execute: nav_goto_lights
+                  widgets:
+                    - label:
+                        align: CENTER
+                        text_color: ${fg}
+                        text_font: font_sm
+                        text: "lights"
+              - button:
+                  id: lum_navtabs_btn_settings
+                  width: 60
+                  height: 32
+                  bg_opa: TRANSP
+                  border_width: 0
+                  on_click:
+                    - script.execute: nav_goto_settings
+                  widgets:
+                    - label:
+                        align: CENTER
+                        text_color: ${fg}
+                        text_font: font_sm
+                        text: "set"

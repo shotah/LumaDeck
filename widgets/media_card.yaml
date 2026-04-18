@@ -1,0 +1,116 @@
+# ---------------------------------------------------------------
+# widget: media_card
+# version: 0.1.0
+# reads:        ${bg_alt} ${fg} ${fg_muted} ${accent} ${font_md} ${font_sm}
+# targets:      media_page
+# exposes:      lum_media_root lum_media_title lum_media_artist
+#               lum_media_btn_prev lum_media_btn_play lum_media_btn_next
+# ha_entities:  ${ha_media_player}
+# ha_services:  media_player.media_play_pause/next_track/previous_track
+# requires:     packages/ha.yaml
+# ---------------------------------------------------------------
+
+text_sensor:
+  - platform: homeassistant
+    id: lum_media_title_src
+    entity_id: ${ha_media_player}
+    attribute: media_title
+    on_value:
+      - lvgl.label.update:
+          id: lum_media_title
+          text: !lambda 'return x.c_str();'
+
+  - platform: homeassistant
+    id: lum_media_artist_src
+    entity_id: ${ha_media_player}
+    attribute: media_artist
+    on_value:
+      - lvgl.label.update:
+          id: lum_media_artist
+          text: !lambda 'return x.c_str();'
+
+lvgl:
+  pages:
+    - id: !extend media_page
+      widgets:
+        - obj:
+            id: lum_media_root
+            align: CENTER
+            width: 280
+            height: 200
+            bg_color: ${bg_alt}
+            border_color: ${border}
+            border_width: ${border_w}
+            radius: ${radius_lg}
+            pad_all: ${pad_md}
+            layout:
+              type: FLEX
+              flex_flow: COLUMN
+              flex_align_main: SPACE_BETWEEN
+              flex_align_cross: CENTER
+            widgets:
+              - label:
+                  id: lum_media_title
+                  text_color: ${fg}
+                  text_font: font_md
+                  text: "Nothing playing"
+                  long_mode: SCROLL_CIRCULAR
+                  width: 240
+              - label:
+                  id: lum_media_artist
+                  text_color: ${fg_muted}
+                  text_font: font_sm
+                  text: ""
+              - obj:
+                  width: 240
+                  height: 56
+                  bg_opa: TRANSP
+                  border_width: 0
+                  layout:
+                    type: FLEX
+                    flex_flow: ROW
+                    flex_align_main: SPACE_EVENLY
+                    flex_align_cross: CENTER
+                  widgets:
+                    - button:
+                        id: lum_media_btn_prev
+                        width: 64
+                        height: 44
+                        bg_color: ${bg}
+                        radius: ${radius_md}
+                        on_click:
+                          - script.execute: ha_media_prev
+                        widgets:
+                          - label:
+                              align: CENTER
+                              text_color: ${fg}
+                              text_font: font_md
+                              text: "<<"
+                    - button:
+                        id: lum_media_btn_play
+                        width: 72
+                        height: 44
+                        bg_color: ${accent}
+                        radius: ${radius_md}
+                        on_click:
+                          - script.execute: ha_media_play_pause
+                        widgets:
+                          - label:
+                              align: CENTER
+                              text_color: ${bg}
+                              text_font: font_md
+                              text: "play"
+                    - button:
+                        id: lum_media_btn_next
+                        width: 64
+                        height: 44
+                        bg_color: ${bg}
+                        radius: ${radius_md}
+                        on_click:
+                          - script.execute: ha_media_next
+                        widgets:
+                          - label:
+                              align: CENTER
+                              text_color: ${fg}
+                              text_font: font_md
+                              text: ">>"

@@ -1,0 +1,13 @@
+# ---------------------------------------------------------------
+# package: board_esp32c3
+# Generic ESP32-C3 board definition.
+# ---------------------------------------------------------------
+
+substitutions:
+  board_variant: "esp32-c3-devkitm-1"
+
+esp32:
+  board: ${board_variant}
+  variant: ESP32C3
+  framework:
+    type: esp-idf

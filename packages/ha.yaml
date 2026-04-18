@@ -1,0 +1,46 @@
+# ---------------------------------------------------------------
+# package: ha
+# Optional Home Assistant integration helpers. Widgets that talk to HA
+# expect this package to be included. All entity ids are passed in via
+# substitutions so widgets remain reusable.
+# ---------------------------------------------------------------
+
+substitutions:
+  # Default entities. Override per-device.
+  ha_media_player:   "media_player.living_room"
+  ha_weather:        "weather.home"
+  ha_thermostat:     "climate.living_room"
+  ha_light_primary:  "light.living_room"
+  ha_scene_movie:    "scene.movie_time"
+  ha_scene_bedtime:  "scene.bedtime"
+
+# Generic service-call wrappers. Widgets call these via
+# `script.execute: ha_service_<name>` so the entity_id stays in YAML.
+script:
+  - id: ha_media_play_pause
+    then:
+      - homeassistant.service:
+          service: media_player.media_play_pause
+          data:
+            entity_id: ${ha_media_player}
+
+  - id: ha_media_next
+    then:
+      - homeassistant.service:
+          service: media_player.media_next_track
+          data:
+            entity_id: ${ha_media_player}
+
+  - id: ha_media_prev
+    then:
+      - homeassistant.service:
+          service: media_player.media_previous_track
+          data:
+            entity_id: ${ha_media_player}
+
+  - id: ha_light_toggle
+    then:
+      - homeassistant.service:
+          service: light.toggle
+          data:
+            entity_id: ${ha_light_primary}

@@ -1,0 +1,51 @@
+# ---------------------------------------------------------------
+# package: nav
+# Generic page navigation actions. Widgets bind these to buttons or
+# touch gestures via on_press / on_swipe. Page ids must exist in the
+# active layout (see docs/layout-contract.md).
+# ---------------------------------------------------------------
+
+script:
+  - id: nav_goto_home
+    then:
+      - lvgl.page.show: home_page
+
+  - id: nav_goto_media
+    then:
+      - lvgl.page.show:
+          id: media_page
+          animation: MOVE_LEFT
+          time: ${anim_time}ms
+
+  - id: nav_goto_lights
+    then:
+      - lvgl.page.show:
+          id: lights_page
+          animation: MOVE_LEFT
+          time: ${anim_time}ms
+
+  - id: nav_goto_climate
+    then:
+      - lvgl.page.show:
+          id: climate_page
+          animation: MOVE_LEFT
+          time: ${anim_time}ms
+
+  - id: nav_goto_settings
+    then:
+      - lvgl.page.show:
+          id: settings_page
+          animation: MOVE_LEFT
+          time: ${anim_time}ms
+
+  - id: nav_next_page
+    then:
+      - lvgl.page.next:
+          animation: MOVE_LEFT
+          time: ${anim_time}ms
+
+  - id: nav_prev_page
+    then:
+      - lvgl.page.previous:
+          animation: MOVE_RIGHT
+          time: ${anim_time}ms

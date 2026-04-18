@@ -1,0 +1,38 @@
+# ---------------------------------------------------------------
+# theme: neon
+# Cyberpunk-inspired. Deep purple background, magenta + cyan accents.
+# ---------------------------------------------------------------
+
+substitutions:
+  bg:           "0x0A0014"
+  bg_alt:       "0x1A0030"
+  fg:           "0xE0E0FF"
+  fg_muted:     "0x7A6E96"
+  accent:       "0xFF00C8"
+  accent_alt:   "0x00FFD1"
+  success:      "0x00FFA3"
+  warn:         "0xFFD400"
+  error:        "0xFF1744"
+  border:       "0x3A1066"
+
+  font_family:    "Orbitron"
+  font_size_xl:   "52"
+  font_size_lg:   "30"
+  font_size_md:   "18"
+  font_size_sm:   "14"
+  font_size_icon: "24"
+
+  radius_sm:    "2"
+  radius_md:    "6"
+  radius_lg:    "12"
+  radius_pill:  "999"
+  pad_sm:       "4"
+  pad_md:       "8"
+  pad_lg:       "16"
+  border_w:     "2"
+
+  gradient_a:   "0xFF00C8"
+  gradient_b:   "0x00FFD1"
+  shadow_color: "0xFF00C8"
+  shadow_op:    "128"
+  anim_time:    "150"

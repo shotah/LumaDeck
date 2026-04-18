@@ -1,0 +1,55 @@
+# ---------------------------------------------------------------
+# widget: status_bar
+# version: 0.1.0
+# reads:        ${bg} ${fg} ${fg_muted} ${success} ${error} ${font_sm}
+# targets:      home_page
+# exposes:      lum_status_root lum_status_wifi lum_status_api lum_status_time
+# ha_entities:  ha_time
+# ha_services:  none
+# ---------------------------------------------------------------
+
+lvgl:
+  pages:
+    - id: !extend home_page
+      widgets:
+        - obj:
+            id: lum_status_root
+            align_to:
+              id: region_top
+              align: CENTER
+              x: 0
+              y: 0
+            width: 220
+            height: 24
+            bg_opa: TRANSP
+            border_width: 0
+            pad_all: 0
+            layout:
+              type: FLEX
+              flex_flow: ROW
+              flex_align_main: SPACE_BETWEEN
+              flex_align_cross: CENTER
+            widgets:
+              - label:
+                  id: lum_status_wifi
+                  text_color: ${success}
+                  text_font: font_sm
+                  text: "wifi"
+              - label:
+                  id: lum_status_time
+                  text_color: ${fg}
+                  text_font: font_sm
+                  text: "--:--"
+              - label:
+                  id: lum_status_api
+                  text_color: ${success}
+                  text_font: font_sm
+                  text: "api"
+
+interval:
+  - interval: 1s
+    then:
+      - lvgl.label.update:
+          id: lum_status_time
+          text: !lambda |-
+            return id(ha_time).now().strftime("%H:%M").c_str();

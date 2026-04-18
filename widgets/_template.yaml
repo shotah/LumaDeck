@@ -1,0 +1,33 @@
+# ---------------------------------------------------------------
+# widget: _template
+# version: 0.1.0
+# reads:        ${bg} ${fg} ${accent} ${font_md}
+# targets:      home_page
+# exposes:      lum_template_root
+# ha_entities:  none
+# ha_services:  none
+# config:       ${template_text:-Hello}
+# ---------------------------------------------------------------
+
+substitutions:
+  template_text: "Hello"
+
+lvgl:
+  pages:
+    - id: !extend home_page
+      widgets:
+        - obj:
+            id: lum_template_root
+            align: CENTER
+            width: 120
+            height: 60
+            bg_color: ${bg_alt}
+            border_color: ${border}
+            border_width: ${border_w}
+            radius: ${radius_md}
+            widgets:
+              - label:
+                  align: CENTER
+                  text_color: ${fg}
+                  text_font: font_md
+                  text: ${template_text}

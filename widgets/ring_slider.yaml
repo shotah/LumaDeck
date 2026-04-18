@@ -1,0 +1,55 @@
+# ---------------------------------------------------------------
+# widget: ring_slider
+# version: 0.1.0
+# reads:        ${bg_alt} ${fg} ${accent} ${border}
+# targets:      home_page
+# exposes:      lum_ring_arc lum_ring_label
+# ha_entities:  ${ring_target_entity:-light.living_room}
+# ha_services:  ${ring_service:-light.turn_on}
+# config:       ${ring_min:-0} ${ring_max:-100} ${ring_size:-220}
+#               ${ring_unit:-%} ${ring_attr:-brightness_pct}
+# ---------------------------------------------------------------
+
+substitutions:
+  ring_target_entity: "light.living_room"
+  ring_service:       "light.turn_on"
+  ring_attr:          "brightness_pct"
+  ring_min:           "0"
+  ring_max:           "100"
+  ring_size:          "220"
+  ring_unit:          "%"
+
+lvgl:
+  pages:
+    - id: !extend home_page
+      widgets:
+        - arc:
+            id: lum_ring_arc
+            align: CENTER
+            width: ${ring_size}
+            height: ${ring_size}
+            min_value: ${ring_min}
+            max_value: ${ring_max}
+            value: 50
+            arc_width: 14
+            arc_color: ${border}
+            indicator:
+              arc_color: ${accent}
+              arc_width: 14
+            knob:
+              bg_color: ${accent}
+              radius: ${radius_pill}
+              pad_all: 4
+            on_value:
+              - homeassistant.service:
+                  service: ${ring_service}
+                  data:
+                    entity_id: ${ring_target_entity}
+                  data_template:
+                    ${ring_attr}: !lambda 'return std::to_string((int)x);'
+        - label:
+            id: lum_ring_label
+            align: CENTER
+            text_color: ${fg}
+            text_font: font_xl
+            text: "50${ring_unit}"

@@ -1,0 +1,56 @@
+# ---------------------------------------------------------------
+# widget: progress_ring
+# version: 0.1.0
+# reads:        ${bg_alt} ${fg} ${accent} ${border}
+# targets:      home_page
+# exposes:      lum_progress_arc lum_progress_label
+# ha_entities:  optional via lum_progress_set script
+# ha_services:  none
+# config:       ${progress_size:-180} ${progress_min:-0} ${progress_max:-100}
+#               ${progress_unit:-%}
+# ---------------------------------------------------------------
+
+substitutions:
+  progress_size:  "180"
+  progress_min:   "0"
+  progress_max:   "100"
+  progress_unit:  "%"
+
+lvgl:
+  pages:
+    - id: !extend home_page
+      widgets:
+        - arc:
+            id: lum_progress_arc
+            align: CENTER
+            width: ${progress_size}
+            height: ${progress_size}
+            min_value: ${progress_min}
+            max_value: ${progress_max}
+            value: 0
+            arc_width: 10
+            arc_color: ${border}
+            indicator:
+              arc_color: ${accent}
+              arc_width: 10
+            adv_hittest: false
+            clickable: false
+        - label:
+            id: lum_progress_label
+            align: CENTER
+            text_color: ${fg}
+            text_font: font_lg
+            text: "0${progress_unit}"
+
+script:
+  - id: lum_progress_set
+    parameters:
+      pct: int
+    then:
+      - lvgl.arc.update:
+          id: lum_progress_arc
+          value: !lambda 'return pct;'
+      - lvgl.label.update:
+          id: lum_progress_label
+          text: !lambda |-
+            return (std::to_string(pct) + std::string("${progress_unit}"));

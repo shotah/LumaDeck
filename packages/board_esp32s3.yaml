@@ -1,0 +1,15 @@
+# ---------------------------------------------------------------
+# package: board_esp32s3
+# Generic ESP32-S3 board definition. Pick this OR another board
+# package in your device YAML, never both.
+# ---------------------------------------------------------------
+
+substitutions:
+  board_variant: "esp32-s3-devkitc-1"
+  flash_size:    "16MB"
+
+esp32:
+  board: ${board_variant}
+  flash_size: ${flash_size}
+  framework:
+    type: esp-idf

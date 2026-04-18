@@ -1,0 +1,32 @@
+# ---------------------------------------------------------------
+# example: room-controller
+# Wide 480x320 multi-page room controller. Lights, climate, scenes,
+# media. Demonstrates several widgets across multiple pages.
+# ---------------------------------------------------------------
+
+substitutions:
+  device_name:       "living_room_panel"
+  device_friendly:   "Living Room Panel"
+  ha_light_primary:  "light.living_room"
+  ha_media_player:   "media_player.living_room"
+  ha_thermostat:     "climate.living_room"
+  ha_weather:        "weather.home"
+
+packages:
+  core:      !include ../packages/core.yaml
+  board:     !include ../packages/board_esp32s3.yaml
+  theme:     !include ../themes/dark.yaml
+  fonts:     !include ../packages/fonts.yaml
+  colors:    !include ../packages/colors.yaml
+  display:   !include ../packages/display.yaml
+  ha:        !include ../packages/ha.yaml
+  nav:       !include ../packages/nav.yaml
+  layout:    !include ../layouts/wide_480x320.yaml
+  status:    !include ../widgets/status_bar.yaml
+  clock:     !include ../widgets/clock.yaml
+  weather:   !include ../widgets/weather.yaml
+  navtabs:   !include ../widgets/nav_tabs.yaml
+  light:     !include ../widgets/light_button.yaml
+  media:     !include ../widgets/media_card.yaml
+  thermo:    !include ../widgets/thermostat.yaml
+  toast:     !include ../widgets/notification_toast.yaml

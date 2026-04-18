@@ -1,0 +1,26 @@
+# ---------------------------------------------------------------
+# example: media-remote
+# Round 360x360 media remote: clock on home, full media controls on
+# media_page, swipe / nav_tabs to switch.
+# ---------------------------------------------------------------
+
+substitutions:
+  device_name:      "media_remote"
+  device_friendly:  "Media Remote"
+  ha_media_player:  "media_player.spotify"
+
+packages:
+  core:      !include ../packages/core.yaml
+  board:     !include ../packages/board_esp32s3.yaml
+  theme:     !include ../themes/dark.yaml
+  fonts:     !include ../packages/fonts.yaml
+  colors:    !include ../packages/colors.yaml
+  display:   !include ../packages/display.yaml
+  ha:        !include ../packages/ha.yaml
+  nav:       !include ../packages/nav.yaml
+  layout:    !include ../layouts/round_360.yaml
+  clock:     !include ../widgets/clock.yaml
+  navtabs:   !include ../widgets/nav_tabs.yaml
+  media:     !include ../widgets/media_card.yaml
+  album:     !include ../widgets/album_art.yaml
+  toast:     !include ../widgets/notification_toast.yaml

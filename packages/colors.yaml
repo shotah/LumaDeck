@@ -1,0 +1,22 @@
+# ---------------------------------------------------------------
+# package: colors
+# Optional palette extension. Provides semantic color aliases on top of
+# the theme contract. Include this AFTER the theme so the theme can
+# override anything here.
+# ---------------------------------------------------------------
+
+substitutions:
+  # Semantic aliases that default to the theme accent / state colors.
+  color_link:        "${accent}"
+  color_link_hover:  "${accent_alt}"
+  color_on:          "${success}"
+  color_off:         "${fg_muted}"
+  color_disabled:    "${fg_muted}"
+  color_overlay:     "0x000000"
+
+  # Bar / chart palette (5 distinct hues). Themes may override.
+  chart_1:           "${accent}"
+  chart_2:           "${accent_alt}"
+  chart_3:           "${success}"
+  chart_4:           "${warn}"
+  chart_5:           "${error}"

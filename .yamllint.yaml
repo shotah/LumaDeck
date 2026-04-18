@@ -1,0 +1,35 @@
+---
+extends: default
+
+rules:
+  line-length:
+    max: 120
+    level: warning
+  document-start: disable
+  truthy:
+    check-keys: false
+  comments:
+    min-spaces-from-content: 1
+  comments-indentation: disable
+  # Indentation rules are intentionally lenient. ESPHome's preferred
+  # style aligns nested `package:` includes with extra spaces for
+  # readability, which the default linter dislikes.
+  colons:
+    max-spaces-after: -1
+  indentation:
+    spaces: 2
+    indent-sequences: true
+    check-multi-line-strings: false
+  empty-lines:
+    max: 2
+    max-end: 1
+  # `.gitattributes` normalises line endings on commit; locally we
+  # don't fight Windows checkouts.
+  new-lines: disable
+
+ignore: |
+  .venv/
+  venv/
+  build/
+  dist/
+  *.egg-info/

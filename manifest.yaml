@@ -1,0 +1,84 @@
+# ---------------------------------------------------------------
+# LumaDeck package manifest. Machine-readable summary of what this
+# repo provides. Consumers (e.g. a future HACS-style installer) can
+# read this to know which themes/layouts/widgets are available without
+# walking the filesystem.
+# ---------------------------------------------------------------
+
+name: lumadeck
+version: 0.1.0
+description: Universal ESPHome + LVGL UI package
+license: MIT
+homepage: https://github.com/shotah/LumaDeck
+maintainers:
+  - "Christopher Blodgett"
+
+requires:
+  esphome: ">=2024.6.0"
+  lvgl_component: true
+
+contracts:
+  theme:  docs/theme-contract.md
+  layout: docs/layout-contract.md
+  widget: docs/widget-contract.md
+
+provides:
+  packages:
+    - core
+    - board_esp32
+    - board_esp32s3
+    - board_esp32c3
+    - fonts
+    - colors
+    - display
+    - ha
+    - nav
+    - touch
+
+  themes:
+    - dark
+    - light
+    - neon
+    - high_contrast
+
+  layouts:
+    - round_240
+    - round_360
+    - square_240
+    - square_320
+    - tall_240x320
+    - tall_240x536
+    - wide_480x320
+    - wide_536x240
+
+  reference_hardware:
+    - name: "Waveshare ESP32-S3-Touch-LCD-1.85C"
+      url: "https://www.waveshare.com/esp32-s3-touch-lcd-1.85c.htm"
+      example: "examples/waveshare-1.85c.yaml"
+      layout: "round_360"
+    - name: "LilyGo T-Display-S3 AMOLED"
+      url: "https://lilygo.cc/products/t-display-s3-amoled"
+      driver: "https://github.com/Xinyuan-LilyGO/LilyGo-AMOLED-Series"
+      example: "examples/lilygo-t-display-amoled.yaml"
+      # Default mounting is landscape (rotation: 90 on the display).
+      # Swap to `tall_240x536` for portrait mounting.
+      layout: "wide_536x240"
+      alt_layouts:
+        - "tall_240x536"
+
+  widgets:
+    - clock
+    - analog_clock
+    - status_bar
+    - nav_tabs
+    - media_card
+    - album_art
+    - weather
+    - ring_slider
+    - progress_ring
+    - icon_grid
+    - light_button
+    - scene_button
+    - thermostat
+    - notification_toast
+    - home_dashboard

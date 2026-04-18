@@ -1,0 +1,38 @@
+# ---------------------------------------------------------------
+# widget: scene_button
+# version: 0.1.0
+# reads:        ${bg_alt} ${fg} ${accent} ${border} ${font_md}
+# targets:      home_page
+# exposes:      lum_scene_btn lum_scene_label
+# ha_entities:  ${scene_entity:-scene.movie_time}
+# ha_services:  scene.turn_on
+# config:       ${scene_label:-Scene} ${scene_entity:-scene.movie_time}
+# ---------------------------------------------------------------
+
+substitutions:
+  scene_label:  "Scene"
+  scene_entity: "scene.movie_time"
+
+lvgl:
+  pages:
+    - id: !extend home_page
+      widgets:
+        - button:
+            id: lum_scene_btn
+            align: CENTER
+            width: 160
+            height: 56
+            bg_color: ${accent}
+            radius: ${radius_pill}
+            on_click:
+              - homeassistant.service:
+                  service: scene.turn_on
+                  data:
+                    entity_id: ${scene_entity}
+            widgets:
+              - label:
+                  id: lum_scene_label
+                  align: CENTER
+                  text_color: ${bg}
+                  text_font: font_md
+                  text: ${scene_label}

@@ -1,0 +1,54 @@
+# ---------------------------------------------------------------
+# package: display
+# Hardware-agnostic LVGL base config. The actual `display:` and
+# `touchscreen:` platforms (which depend on the panel/driver) live in
+# the consumer device YAML. This package only configures LVGL itself.
+#
+# The `lvgl:` block defined here intentionally has no displays/
+# touchscreens — those are bound by the consumer file. ESPHome will
+# auto-bind the first declared display when none is specified.
+# ---------------------------------------------------------------
+
+lvgl:
+  bg_color: ${bg}
+  text_font: font_md
+  default_font: font_md
+  log_level: WARN
+  byte_order: big_endian
+  buffer_size: 25%
+
+  style_definitions:
+    - id: style_card
+      bg_color: ${bg_alt}
+      bg_opa: COVER
+      border_color: ${border}
+      border_width: ${border_w}
+      radius: ${radius_md}
+      pad_all: ${pad_md}
+      text_color: ${fg}
+      text_font: font_md
+
+    - id: style_button
+      bg_color: ${accent}
+      bg_opa: COVER
+      border_width: 0
+      radius: ${radius_md}
+      text_color: ${bg}
+      text_font: font_md
+      pad_all: ${pad_md}
+
+    - id: style_button_pressed
+      bg_color: ${accent_alt}
+      bg_opa: COVER
+
+    - id: style_label_lg
+      text_color: ${fg}
+      text_font: font_lg
+
+    - id: style_label_xl
+      text_color: ${fg}
+      text_font: font_xl
+
+    - id: style_label_muted
+      text_color: ${fg_muted}
+      text_font: font_sm

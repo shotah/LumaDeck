@@ -1,0 +1,41 @@
+# ---------------------------------------------------------------
+# widget: album_art
+# version: 0.1.0
+# reads:        ${bg_alt} ${border} ${radius_md}
+# targets:      media_page
+# exposes:      lum_album_root lum_album_image
+# ha_entities:  ${ha_media_player}.entity_picture
+# ha_services:  none
+# config:       ${album_size:-160}
+#
+# Note: ESPHome doesn't natively pull HA entity_picture URLs at runtime
+# without an HTTP image loader. This widget renders a placeholder card
+# and exposes lum_album_image so a future http_request-based fetcher
+# can update it. Until then it's a styled frame.
+# ---------------------------------------------------------------
+
+substitutions:
+  album_size: "160"
+
+lvgl:
+  pages:
+    - id: !extend media_page
+      widgets:
+        - obj:
+            id: lum_album_root
+            align: TOP_MID
+            y: 16
+            width: ${album_size}
+            height: ${album_size}
+            bg_color: ${bg_alt}
+            border_color: ${border}
+            border_width: ${border_w}
+            radius: ${radius_md}
+            pad_all: 0
+            widgets:
+              - label:
+                  id: lum_album_image
+                  align: CENTER
+                  text_color: ${fg_muted}
+                  text_font: font_sm
+                  text: "no art"

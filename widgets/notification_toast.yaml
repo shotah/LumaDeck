@@ -1,0 +1,58 @@
+# ---------------------------------------------------------------
+# widget: notification_toast
+# version: 0.1.0
+# reads:        ${bg_alt} ${fg} ${accent} ${border} ${anim_time} ${font_sm}
+# targets:      top_layer (overlay across all pages)
+# exposes:      lum_toast_root lum_toast_label
+# ha_entities:  none
+# ha_services:  none
+# api:          script.execute lum_toast_show with parameter `msg`
+# ---------------------------------------------------------------
+
+substitutions:
+  toast_duration_ms: "2500"
+
+lvgl:
+  top_layer:
+    widgets:
+      - obj:
+          id: lum_toast_root
+          align: TOP_MID
+          y: -64
+          width: 280
+          height: 44
+          bg_color: ${bg_alt}
+          border_color: ${accent}
+          border_width: ${border_w}
+          radius: ${radius_pill}
+          pad_all: ${pad_sm}
+          hidden: true
+          widgets:
+            - label:
+                id: lum_toast_label
+                align: CENTER
+                text_color: ${fg}
+                text_font: font_sm
+                text: ""
+                long_mode: DOT
+                width: 250
+
+script:
+  - id: lum_toast_show
+    parameters:
+      msg: string
+    mode: restart
+    then:
+      - lvgl.label.update:
+          id: lum_toast_label
+          text: !lambda 'return msg;'
+      - lvgl.widget.show: lum_toast_root
+      - lvgl.widget.update:
+          id: lum_toast_root
+          y: 16
+      - delay: ${toast_duration_ms}ms
+      - lvgl.widget.update:
+          id: lum_toast_root
+          y: -64
+      - delay: ${anim_time}ms
+      - lvgl.widget.hide: lum_toast_root

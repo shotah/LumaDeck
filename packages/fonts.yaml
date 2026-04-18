@@ -1,0 +1,44 @@
+# ---------------------------------------------------------------
+# package: fonts
+# Declares the standard LumaDeck font ids that every widget relies on.
+# Sizes are pulled from the active theme via substitutions.
+# ---------------------------------------------------------------
+
+font:
+  - file: "gfonts://${font_family}"
+    id: font_xl
+    size: ${font_size_xl}
+    glyphs: &lumadeck_glyphs
+      [
+        " ", "!", "\"", "#", "$", "%", "&", "'", "(", ")", "*", "+", ",",
+        "-", ".", "/",
+        "0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
+        ":", ";", "<", "=", ">", "?", "@",
+        "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M",
+        "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z",
+        "[", "\\", "]", "^", "_", "`",
+        "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m",
+        "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z",
+        "{", "|", "}", "~", "°", "·",
+      ]
+
+  - file: "gfonts://${font_family}"
+    id: font_lg
+    size: ${font_size_lg}
+    glyphs: *lumadeck_glyphs
+
+  - file: "gfonts://${font_family}"
+    id: font_md
+    size: ${font_size_md}
+    glyphs: *lumadeck_glyphs
+
+  - file: "gfonts://${font_family}"
+    id: font_sm
+    size: ${font_size_sm}
+    glyphs: *lumadeck_glyphs
+
+  # Material Design Icons via gfonts. Override in a consumer device by
+  # redefining the `font_icon` id with a different icon set.
+  - file: "gfonts://Material Symbols Outlined"
+    id: font_icon
+    size: ${font_size_icon}

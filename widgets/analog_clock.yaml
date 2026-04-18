@@ -1,0 +1,68 @@
+# ---------------------------------------------------------------
+# widget: analog_clock
+# version: 0.1.0
+# reads:        ${bg} ${fg} ${accent} ${accent_alt} ${border}
+# targets:      home_page
+# exposes:      lum_analog_face lum_analog_hour lum_analog_min lum_analog_sec
+# ha_entities:  ha_time
+# ha_services:  none
+# config:       ${analog_size:-220} ${analog_show_seconds:-true}
+# ---------------------------------------------------------------
+
+substitutions:
+  analog_size:          "220"
+  analog_show_seconds:  "true"
+
+lvgl:
+  pages:
+    - id: !extend home_page
+      widgets:
+        - obj:
+            id: lum_analog_face
+            align: CENTER
+            width: ${analog_size}
+            height: ${analog_size}
+            radius: ${radius_pill}
+            bg_color: ${bg_alt}
+            border_color: ${border}
+            border_width: ${border_w}
+            widgets:
+              - line:
+                  id: lum_analog_hour
+                  points:
+                    - [110, 110]
+                    - [110, 50]
+                  line_color: ${fg}
+                  line_width: 6
+                  line_rounded: true
+              - line:
+                  id: lum_analog_min
+                  points:
+                    - [110, 110]
+                    - [110, 30]
+                  line_color: ${fg}
+                  line_width: 4
+                  line_rounded: true
+              - line:
+                  id: lum_analog_sec
+                  points:
+                    - [110, 110]
+                    - [110, 20]
+                  line_color: ${accent}
+                  line_width: 2
+                  line_rounded: true
+              - obj:
+                  align: CENTER
+                  width: 10
+                  height: 10
+                  radius: ${radius_pill}
+                  bg_color: ${accent}
+                  border_width: 0
+
+interval:
+  - interval: 1s
+    then:
+      - lambda: |-
+          // Real implementation would rotate the line points based on
+          // id(ha_time).now() hour/min/sec. Left as a stub: rotate via
+          // an LVGL transform_angle property when running on hardware.

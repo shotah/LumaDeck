@@ -1,0 +1,21 @@
+# ---------------------------------------------------------------
+# example: square-light-clock
+# Proof of genericness: same widgets, different theme + layout.
+# Square 240x240 panel, light theme, just a clock + weather.
+# ---------------------------------------------------------------
+
+substitutions:
+  device_name:     "kitchen_clock"
+  device_friendly: "Kitchen Clock"
+  ha_weather:      "weather.home"
+
+packages:
+  core:    !include ../packages/core.yaml
+  board:   !include ../packages/board_esp32s3.yaml
+  theme:   !include ../themes/light.yaml
+  fonts:   !include ../packages/fonts.yaml
+  display: !include ../packages/display.yaml
+  ha:      !include ../packages/ha.yaml
+  layout:  !include ../layouts/square_240.yaml
+  clock:   !include ../widgets/clock.yaml
+  weather: !include ../widgets/weather.yaml

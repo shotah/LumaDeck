@@ -1,0 +1,40 @@
+# ---------------------------------------------------------------
+# example: round-clock
+# Minimal LumaDeck device YAML for a 360x360 round display.
+#
+# This file represents what a CONSUMER repo (the hardware repo) would
+# write. It expects:
+#   * secrets.yaml in the same directory
+#   * the LumaDeck repo cloned next to this file as `lumadeck/`
+#     (or symlinked into the ESPHome config dir)
+#   * a `display:` and (optional) `touchscreen:` defined here, since
+#     those are hardware-specific.
+# ---------------------------------------------------------------
+
+substitutions:
+  device_name:     "round_clock"
+  device_friendly: "Round Clock"
+
+packages:
+  core:    !include ../packages/core.yaml
+  board:   !include ../packages/board_esp32s3.yaml
+  theme:   !include ../themes/dark.yaml
+  fonts:   !include ../packages/fonts.yaml
+  display: !include ../packages/display.yaml
+  layout:  !include ../layouts/round_360.yaml
+  clock:   !include ../widgets/clock.yaml
+
+# ---- hardware-specific bits live here, NOT in lumadeck/ ----
+# Replace with your actual driver. This example uses a generic ST7789
+# placeholder; the consumer repo for the Waveshare 1.85" round panel
+# would supply the correct driver + pins.
+#
+# spi:
+#   - id: lcd_spi
+#     clk_pin: GPIOXX
+#     mosi_pin: GPIOXX
+#
+# display:
+#   - platform: ili9xxx
+#     model: ST7789V
+#     ...

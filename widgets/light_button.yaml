@@ -1,0 +1,53 @@
+# ---------------------------------------------------------------
+# widget: light_button
+# version: 0.1.0
+# reads:        ${bg_alt} ${fg} ${accent} ${success} ${fg_muted} ${border}
+# targets:      lights_page
+# exposes:      lum_light_btn lum_light_label lum_light_state_src
+# ha_entities:  ${ha_light_primary}
+# ha_services:  light.toggle
+# config:       ${light_button_label:-Light}
+# ---------------------------------------------------------------
+
+substitutions:
+  light_button_label: "Light"
+
+binary_sensor:
+  - platform: homeassistant
+    id: lum_light_state_src
+    entity_id: ${ha_light_primary}
+    on_state:
+      - if:
+          condition:
+            lambda: 'return x;'
+          then:
+            - lvgl.widget.update:
+                id: lum_light_btn
+                bg_color: ${success}
+          else:
+            - lvgl.widget.update:
+                id: lum_light_btn
+                bg_color: ${fg_muted}
+
+lvgl:
+  pages:
+    - id: !extend lights_page
+      widgets:
+        - button:
+            id: lum_light_btn
+            align: CENTER
+            width: 200
+            height: 80
+            bg_color: ${fg_muted}
+            border_color: ${border}
+            border_width: ${border_w}
+            radius: ${radius_md}
+            on_click:
+              - script.execute: ha_light_toggle
+            widgets:
+              - label:
+                  id: lum_light_label
+                  align: CENTER
+                  text_color: ${bg}
+                  text_font: font_lg
+                  text: ${light_button_label}

@@ -1,0 +1,130 @@
+# ---------------------------------------------------------------
+# example: lilygo-t-display-amoled
+# Reference build for the LilyGo T-Display-S3 AMOLED (1.91", 240x536,
+# RM67162 over QSPI, optional CST816T touch).
+#
+#   Product: https://lilygo.cc/products/t-display-s3-amoled
+#   Library: https://github.com/Xinyuan-LilyGO/LilyGo-AMOLED-Series
+#
+# Pin definitions are taken verbatim from
+# `src/LilyGo_AMOLED.h` in the upstream library (`RM67162_AMOLED` and
+# `AMOLED_191_TOUCH_PINS`). This example targets the touch version.
+# For the non-touch board, comment out the i2c: and touchscreen:
+# blocks at the bottom and remove the `touch:` package include.
+#
+# Unlike the other examples in this folder, this file is fully
+# self-contained and is intended to actually compile against ESPHome
+# 2024.10+ (when `qspi_dbi` and `cst816` landed). Verify with:
+#
+#   make verify
+# ---------------------------------------------------------------
+
+substitutions:
+  device_name:      "lilygo_amoled"
+  device_friendly:  "LilyGo AMOLED"
+  ha_media_player:  "media_player.living_room"
+
+packages:
+  core:    !include ../packages/core.yaml
+  board:   !include ../packages/board_esp32s3.yaml
+  theme:   !include ../themes/dark.yaml
+  fonts:   !include ../packages/fonts.yaml
+  colors:  !include ../packages/colors.yaml
+  display: !include ../packages/display.yaml
+  ha:      !include ../packages/ha.yaml
+  nav:     !include ../packages/nav.yaml
+  touch:   !include ../packages/touch.yaml
+  # Landscape mounting (default). Pair with `rotation: 90` on the
+  # display block below. For portrait, swap to
+  # `!include ../layouts/tall_240x536.yaml` and remove the rotation.
+  layout:  !include ../layouts/wide_536x240.yaml
+  status:  !include ../widgets/status_bar.yaml
+  clock:   !include ../widgets/clock.yaml
+  navtabs: !include ../widgets/nav_tabs.yaml
+  media:   !include ../widgets/media_card.yaml
+  toast:   !include ../widgets/notification_toast.yaml
+
+# ---------------------------------------------------------------
+# Hardware-specific config (the part LumaDeck deliberately avoids)
+# ---------------------------------------------------------------
+
+# This board uses 16MB flash + 8MB OPI PSRAM. Override the board
+# package defaults so PSRAM is enabled.
+esp32:
+  board: esp32-s3-devkitc-1
+  flash_size: 16MB
+  framework:
+    type: esp-idf
+  variant: ESP32S3
+
+psram:
+  mode: octal
+  speed: 80MHz
+
+# QSPI bus for the AMOLED driver. RM67162 is a QSPI display.
+spi:
+  - id: lcd_qspi
+    type: quad
+    clk_pin: GPIO47
+    data_pins:
+      - GPIO18    # D0 / SIO0
+      - GPIO7     # D1 / SIO1
+      - GPIO48    # D2 / SIO2
+      - GPIO5     # D3 / SIO3
+
+display:
+  - platform: qspi_dbi
+    id: lum_display
+    model: RM67162
+    spi_id: lcd_qspi
+    cs_pin: GPIO6
+    reset_pin: GPIO17
+    enable_pin: GPIO38   # PMIC enable (AMOLED_191 PMICEnPins)
+    # Native panel resolution is always 240 x 536 (portrait). The
+    # `rotation:` below tells the driver to render landscape; LVGL
+    # then sees a 536 x 240 canvas matching layouts/wide_536x240.yaml.
+    dimensions:
+      width: 240
+      height: 536
+    rotation: 90
+    auto_clear_enabled: false
+    update_interval: never
+
+# I2C bus for the CST816T touch controller (touch version only).
+i2c:
+  - id: bus_a
+    sda: GPIO3
+    scl: GPIO2
+    frequency: 400kHz
+
+touchscreen:
+  - platform: cst816
+    id: lum_touchscreen
+    i2c_id: bus_a
+    interrupt_pin: GPIO21
+    # No dedicated reset pin on this board; touch shares display reset.
+    on_touch:
+      - script.execute: touch_mark_active
+
+# Boot button doubles as a manual page-cycle.
+binary_sensor:
+  - platform: gpio
+    id: lum_boot_btn
+    pin:
+      number: GPIO0
+      mode: INPUT_PULLUP
+      inverted: true
+    on_press:
+      - script.execute: nav_next_page
+
+# Battery voltage sensor (raw ADC; the LilyGo PMU divider gives
+# roughly Vbat/2 on GPIO4).
+sensor:
+  - platform: adc
+    id: lum_bat_voltage
+    pin: GPIO4
+    name: "${device_friendly} Battery Voltage"
+    attenuation: 12db
+    update_interval: 60s
+    filters:
+      - multiply: 2.0

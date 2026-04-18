@@ -1,0 +1,38 @@
+# ---------------------------------------------------------------
+# theme: light
+# Bright theme for sunlit rooms. Off-white background.
+# ---------------------------------------------------------------
+
+substitutions:
+  bg:           "0xF7F7F7"
+  bg_alt:       "0xFFFFFF"
+  fg:           "0x111111"
+  fg_muted:     "0x6B7280"
+  accent:       "0x2563EB"
+  accent_alt:   "0x3B82F6"
+  success:      "0x16A34A"
+  warn:         "0xD97706"
+  error:        "0xDC2626"
+  border:       "0xE5E7EB"
+
+  font_family:    "Montserrat"
+  font_size_xl:   "48"
+  font_size_lg:   "28"
+  font_size_md:   "18"
+  font_size_sm:   "14"
+  font_size_icon: "24"
+
+  radius_sm:    "4"
+  radius_md:    "12"
+  radius_lg:    "24"
+  radius_pill:  "999"
+  pad_sm:       "4"
+  pad_md:       "8"
+  pad_lg:       "16"
+  border_w:     "1"
+
+  gradient_a:   "0x2563EB"
+  gradient_b:   "0x60A5FA"
+  shadow_color: "0x000000"
+  shadow_op:    "32"
+  anim_time:    "200"

@@ -1,0 +1,68 @@
+# ---------------------------------------------------------------
+# widget: home_dashboard (composite)
+# version: 0.1.0
+# reads:        ${bg_alt} ${fg} ${fg_muted} ${accent} ${border}
+#               ${font_xl} ${font_sm}
+# targets:      home_page
+# exposes:      lum_home_time lum_home_btn_lights lum_home_btn_music
+# ha_entities:  ha_time, ${ha_light_primary}, ${ha_media_player}
+# ha_services:  light.toggle, media_player.media_play_pause
+# requires:     packages/ha.yaml
+#
+# An opinionated reference home screen. Use this widget OR compose
+# clock + nav_tabs + scene_button yourself, not both.
+# ---------------------------------------------------------------
+
+lvgl:
+  pages:
+    - id: !extend home_page
+      widgets:
+        - label:
+            id: lum_home_time
+            align: CENTER
+            y: -60
+            text_color: ${fg}
+            text_font: font_xl
+            text: "--:--"
+
+        - button:
+            id: lum_home_btn_lights
+            width: 100
+            height: 44
+            y: 40
+            x: -55
+            bg_color: ${accent}
+            radius: ${radius_md}
+            on_click:
+              - script.execute: ha_light_toggle
+            widgets:
+              - label:
+                  align: CENTER
+                  text_color: ${bg}
+                  text_font: font_md
+                  text: "Lights"
+
+        - button:
+            id: lum_home_btn_music
+            width: 100
+            height: 44
+            y: 40
+            x: 55
+            bg_color: ${accent}
+            radius: ${radius_md}
+            on_click:
+              - script.execute: ha_media_play_pause
+            widgets:
+              - label:
+                  align: CENTER
+                  text_color: ${bg}
+                  text_font: font_md
+                  text: "Music"
+
+interval:
+  - interval: 1s
+    then:
+      - lvgl.label.update:
+          id: lum_home_time
+          text: !lambda |-
+            return id(ha_time).now().strftime("%H:%M").c_str();

@@ -1,0 +1,51 @@
+# ---------------------------------------------------------------
+# widget: clock
+# version: 0.1.0
+# reads:        ${bg} ${fg} ${accent} ${font_xl} ${font_sm}
+# targets:      home_page
+# exposes:      lum_clock_time lum_clock_date
+# ha_entities:  ha_time (provided by packages/core.yaml)
+# ha_services:  none
+# config:       ${clock_format:-%H:%M} ${clock_show_date:-true}
+# ---------------------------------------------------------------
+
+substitutions:
+  clock_format:    "%H:%M"
+  clock_date_fmt:  "%a %b %d"
+  clock_show_date: "true"
+
+lvgl:
+  pages:
+    - id: !extend home_page
+      widgets:
+        - label:
+            id: lum_clock_time
+            align: CENTER
+            y: -10
+            text_color: ${fg}
+            text_font: font_xl
+            text: "--:--"
+
+        - label:
+            id: lum_clock_date
+            align: CENTER
+            y: 36
+            text_color: ${fg_muted}
+            text_font: font_sm
+            text: ""
+
+interval:
+  - interval: 1s
+    then:
+      - lvgl.label.update:
+          id: lum_clock_time
+          text: !lambda |-
+            return id(ha_time).now().strftime("${clock_format}").c_str();
+      - if:
+          condition:
+            lambda: 'return std::string("${clock_show_date}") == "true";'
+          then:
+            - lvgl.label.update:
+                id: lum_clock_date
+                text: !lambda |-
+                  return id(ha_time).now().strftime("${clock_date_fmt}").c_str();

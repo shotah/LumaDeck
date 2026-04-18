@@ -1,0 +1,12 @@
+# ---------------------------------------------------------------
+# package: board_esp32
+# Plain ESP32 (not S3/C3/P4) board definition.
+# ---------------------------------------------------------------
+
+substitutions:
+  board_variant: "esp32dev"
+
+esp32:
+  board: ${board_variant}
+  framework:
+    type: esp-idf

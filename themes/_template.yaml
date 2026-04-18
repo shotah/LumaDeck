@@ -1,0 +1,44 @@
+# ---------------------------------------------------------------
+# theme: _template
+# Copy this file to themes/<name>.yaml and override any subset.
+# Every key here is the canonical default. See docs/theme-contract.md
+# for what each key controls.
+# ---------------------------------------------------------------
+
+substitutions:
+  # ---- colors --------------------------------------------------
+  bg:           "0x101010"
+  bg_alt:       "0x1C1C1C"
+  fg:           "0xFFFFFF"
+  fg_muted:     "0x8A8A8A"
+  accent:       "0x3B82F6"
+  accent_alt:   "0x60A5FA"
+  success:      "0x22C55E"
+  warn:         "0xF59E0B"
+  error:        "0xEF4444"
+  border:       "0x2A2A2A"
+
+  # ---- typography ---------------------------------------------
+  font_family:    "Montserrat"
+  font_size_xl:   "48"
+  font_size_lg:   "28"
+  font_size_md:   "18"
+  font_size_sm:   "14"
+  font_size_icon: "24"
+
+  # ---- shape & spacing ----------------------------------------
+  radius_sm:    "4"
+  radius_md:    "12"
+  radius_lg:    "24"
+  radius_pill:  "999"
+  pad_sm:       "4"
+  pad_md:       "8"
+  pad_lg:       "16"
+  border_w:     "1"
+
+  # ---- optional ------------------------------------------------
+  gradient_a:   "0x3B82F6"
+  gradient_b:   "0x60A5FA"
+  shadow_color: "0x000000"
+  shadow_op:    "64"
+  anim_time:    "200"

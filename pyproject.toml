@@ -1,0 +1,60 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "lumadeck"
+version = "0.1.0"
+description = "Universal ESPHome + LVGL UI package toolkit"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { file = "LICENSE" }
+authors = [
+    { name = "Christopher Blodgett" },
+]
+keywords = ["esphome", "lvgl", "home-assistant", "ui", "smart-display"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Embedded Systems",
+]
+dependencies = [
+    "click>=8.1",
+    "ruamel.yaml>=0.18",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "yamllint>=1.35",
+]
+# Heavy: pulls in platformio etc. Only needed when you want to run
+# `esphome config` against examples/ to verify YAML structure.
+# Install with: pip install -e .[verify]
+verify = [
+    "esphome>=2024.6.0",
+]
+# Convenience extras to install everything in one shot.
+all = [
+    "lumadeck[dev,verify]",
+]
+
+[project.scripts]
+lumadeck = "lumadeck.cli:cli"
+
+[project.urls]
+Homepage = "https://github.com/shotah/LumaDeck"
+Issues = "https://github.com/shotah/LumaDeck/issues"
+
+[tool.setuptools]
+package-dir = { "" = "tools" }
+
+[tool.setuptools.packages.find]
+where = ["tools"]
+include = ["lumadeck*"]

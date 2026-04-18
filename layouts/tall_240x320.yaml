@@ -1,0 +1,59 @@
+# ---------------------------------------------------------------
+# layout: tall_240x320
+# 240x320 portrait display.
+# ---------------------------------------------------------------
+
+substitutions:
+  screen_w:       "240"
+  screen_h:       "320"
+  screen_shape:   "tall"
+  screen_radius:  "0"
+  scale:          "0.8"
+
+lvgl:
+  pages:
+    - id: home_page
+      bg_color: ${bg}
+      widgets:
+        - obj:
+            id: region_top
+            align: TOP_MID
+            width: ${screen_w}
+            height: 28
+            bg_opa: TRANSP
+            border_width: 0
+        - obj:
+            id: region_center
+            align: CENTER
+            width: 1
+            height: 1
+            bg_opa: TRANSP
+            border_width: 0
+        - obj:
+            id: region_bottom
+            align: BOTTOM_MID
+            width: ${screen_w}
+            height: 48
+            bg_opa: TRANSP
+            border_width: 0
+        - obj:
+            id: region_left
+            align: LEFT_MID
+            width: 1
+            height: ${screen_h}
+            bg_opa: TRANSP
+            border_width: 0
+        - obj:
+            id: region_right
+            align: RIGHT_MID
+            width: 1
+            height: ${screen_h}
+            bg_opa: TRANSP
+            border_width: 0
+
+    - id: media_page
+      bg_color: ${bg}
+    - id: lights_page
+      bg_color: ${bg}
+    - id: settings_page
+      bg_color: ${bg}

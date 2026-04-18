@@ -1,0 +1,124 @@
+# ---------------------------------------------------------------
+# widget: thermostat
+# version: 0.1.0
+# reads:        ${bg_alt} ${fg} ${fg_muted} ${accent} ${warn} ${border}
+# targets:      climate_page
+# exposes:      lum_thermo_root lum_thermo_current lum_thermo_target
+#               lum_thermo_btn_up lum_thermo_btn_down
+# ha_entities:  ${ha_thermostat}
+# ha_services:  climate.set_temperature
+# requires:     packages/ha.yaml
+# ---------------------------------------------------------------
+
+sensor:
+  - platform: homeassistant
+    id: lum_thermo_current_src
+    entity_id: ${ha_thermostat}
+    attribute: current_temperature
+    on_value:
+      - lvgl.label.update:
+          id: lum_thermo_current
+          text: !lambda |-
+            char buf[16];
+            snprintf(buf, sizeof(buf), "%.1f°", x);
+            return std::string(buf);
+
+  - platform: homeassistant
+    id: lum_thermo_target_src
+    entity_id: ${ha_thermostat}
+    attribute: temperature
+    on_value:
+      - lvgl.label.update:
+          id: lum_thermo_target
+          text: !lambda |-
+            char buf[16];
+            snprintf(buf, sizeof(buf), "%.1f°", x);
+            return std::string(buf);
+
+lvgl:
+  pages:
+    - id: !extend climate_page
+      widgets:
+        - obj:
+            id: lum_thermo_root
+            align: CENTER
+            width: 280
+            height: 220
+            bg_color: ${bg_alt}
+            border_color: ${border}
+            border_width: ${border_w}
+            radius: ${radius_lg}
+            pad_all: ${pad_md}
+            layout:
+              type: FLEX
+              flex_flow: COLUMN
+              flex_align_main: SPACE_EVENLY
+              flex_align_cross: CENTER
+            widgets:
+              - label:
+                  text_color: ${fg_muted}
+                  text_font: font_sm
+                  text: "current"
+              - label:
+                  id: lum_thermo_current
+                  text_color: ${fg}
+                  text_font: font_xl
+                  text: "--°"
+              - label:
+                  text_color: ${fg_muted}
+                  text_font: font_sm
+                  text: "target"
+              - obj:
+                  width: 240
+                  height: 56
+                  bg_opa: TRANSP
+                  border_width: 0
+                  layout:
+                    type: FLEX
+                    flex_flow: ROW
+                    flex_align_main: SPACE_EVENLY
+                    flex_align_cross: CENTER
+                  widgets:
+                    - button:
+                        id: lum_thermo_btn_down
+                        width: 56
+                        height: 44
+                        bg_color: ${accent}
+                        radius: ${radius_md}
+                        on_click:
+                          - homeassistant.service:
+                              service: climate.set_temperature
+                              data:
+                                entity_id: ${ha_thermostat}
+                              data_template:
+                                temperature: !lambda 'return std::to_string(id(lum_thermo_target_src).state - 0.5);'
+                        widgets:
+                          - label:
+                              align: CENTER
+                              text_color: ${bg}
+                              text_font: font_lg
+                              text: "-"
+                    - label:
+                        id: lum_thermo_target
+                        text_color: ${warn}
+                        text_font: font_lg
+                        text: "--°"
+                    - button:
+                        id: lum_thermo_btn_up
+                        width: 56
+                        height: 44
+                        bg_color: ${accent}
+                        radius: ${radius_md}
+                        on_click:
+                          - homeassistant.service:
+                              service: climate.set_temperature
+                              data:
+                                entity_id: ${ha_thermostat}
+                              data_template:
+                                temperature: !lambda 'return std::to_string(id(lum_thermo_target_src).state + 0.5);'
+                        widgets:
+                          - label:
+                              align: CENTER
+                              text_color: ${bg}
+                              text_font: font_lg
+                              text: "+"

@@ -1,0 +1,38 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+# Runtime dependencies for the `lumadeck` CLI. Keep these in sync with
+# the [project.dependencies] block in pyproject.toml.
+click = ">=8.1"
+"ruamel.yaml" = ">=0.18"
+# Install the LumaDeck package itself in editable mode so the
+# `lumadeck` console script is on PATH after `pipenv install`.
+lumadeck = {editable = true, path = "."}
+
+[dev-packages]
+# Mirrors [project.optional-dependencies].dev in pyproject.toml.
+pytest = ">=8.0"
+yamllint = ">=1.35"
+
+# Optional: install ESPHome locally so `make verify` can run
+# `esphome config` against examples/. Heavy install (~200 MB, includes
+# platformio). If you only want lint/test/validate, comment this out
+# and use `pipenv install --dev --skip-lock` etc.
+# See docs/verifying-examples.md for the full walkthrough.
+esphome = ">=2024.6.0"
+
+[requires]
+python_version = "3.10"
+
+[scripts]
+test         = "pytest -q"
+validate     = "lumadeck validate-all"
+lint         = "yamllint ."
+check        = "bash -c 'yamllint . && lumadeck validate-all && pytest -q'"
+verify       = "bash -c 'for f in examples/*.yaml; do echo \"== $f ==\"; esphome config \"$f\" || exit 1; done'"
+list-themes  = "lumadeck list themes"
+list-layouts = "lumadeck list layouts"
+list-widgets = "lumadeck list widgets"

@@ -39,3 +39,21 @@
 
 # debug information files
 *.dwo
+
+# ---- Python tooling (lumadeck CLI) ----
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+build/
+dist/
+.venv/
+venv/
+
+# ---- ESPHome consumer artifacts (if anyone runs esphome here) ----
+.esphome/
+secrets.yaml
+

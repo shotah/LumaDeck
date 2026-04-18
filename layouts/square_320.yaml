@@ -1,0 +1,59 @@
+# ---------------------------------------------------------------
+# layout: square_320
+# 320x320 square display.
+# ---------------------------------------------------------------
+
+substitutions:
+  screen_w:       "320"
+  screen_h:       "320"
+  screen_shape:   "square"
+  screen_radius:  "0"
+  scale:          "0.9"
+
+lvgl:
+  pages:
+    - id: home_page
+      bg_color: ${bg}
+      widgets:
+        - obj:
+            id: region_top
+            align: TOP_MID
+            width: ${screen_w}
+            height: 1
+            bg_opa: TRANSP
+            border_width: 0
+        - obj:
+            id: region_center
+            align: CENTER
+            width: 1
+            height: 1
+            bg_opa: TRANSP
+            border_width: 0
+        - obj:
+            id: region_bottom
+            align: BOTTOM_MID
+            width: ${screen_w}
+            height: 1
+            bg_opa: TRANSP
+            border_width: 0
+        - obj:
+            id: region_left
+            align: LEFT_MID
+            width: 1
+            height: ${screen_h}
+            bg_opa: TRANSP
+            border_width: 0
+        - obj:
+            id: region_right
+            align: RIGHT_MID
+            width: 1
+            height: ${screen_h}
+            bg_opa: TRANSP
+            border_width: 0
+
+    - id: media_page
+      bg_color: ${bg}
+    - id: lights_page
+      bg_color: ${bg}
+    - id: settings_page
+      bg_color: ${bg}

@@ -1,0 +1,40 @@
+# ---------------------------------------------------------------
+# package: touch
+# Touch-input abstraction. The actual `touchscreen:` platform belongs
+# in the consumer device YAML (it depends on the touch IC: GT911,
+# CST816, FT6336, etc.).
+#
+# This package defines:
+#   * binary_sensor templates that widgets can bind on_press / on_release
+#   * a global flag `lum_touch_active` other widgets can read
+#
+# Consumer YAML is expected to provide a touchscreen with id
+# `lum_touchscreen`. If no touch hardware exists, including this
+# package is a no-op.
+# ---------------------------------------------------------------
+
+globals:
+  - id: lum_touch_active
+    type: bool
+    restore_value: no
+    initial_value: "false"
+
+  - id: lum_last_touch_ms
+    type: uint32_t
+    restore_value: no
+    initial_value: "0"
+
+script:
+  - id: touch_mark_active
+    then:
+      - globals.set:
+          id: lum_touch_active
+          value: "true"
+      - lambda: |-
+          id(lum_last_touch_ms) = millis();
+
+  - id: touch_mark_idle
+    then:
+      - globals.set:
+          id: lum_touch_active
+          value: "false"
