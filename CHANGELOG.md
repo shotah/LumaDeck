@@ -51,6 +51,58 @@ project adheres to [Semantic Versioning](https://semver.org/).
   on a single device (visually it's a mess, but every widget's YAML
   is verified to parse against ESPHome's LVGL schema).
 
+### Consumer-driven hardening (Waveshare 1.85C bring-up)
+
+A real consumer repo wired the Waveshare ESP32-S3-Touch-LCD-1.85C
+(round 360×360, ST77916/QSPI, CST816 touch, TCA9554 expander,
+PCM5101 I²S DAC) onto LumaDeck and surfaced a stack of issues. All
+fixed:
+
+* **Five layouts now declare `climate_page`.** `round_240`,
+  `round_360`, `square_240`, `square_320`, and `tall_240x320` were
+  missing the page that `packages/nav.yaml`'s `nav_goto_climate`
+  references — including those layouts plus `nav.yaml` crashed
+  `esphome config`. `layouts/_template.yaml` updated to ship all
+  five pages so new layouts start contract-compliant.
+* **Layout contract upgraded.** `docs/layout-contract.md` now states
+  that all five pages are required (not optional);
+  `tools/lumadeck/contract.py` matches.
+* **Validator cross-check.** `tools/lumadeck/validate.py` parses
+  every `lvgl.page.show:` reference in `packages/nav.yaml` and
+  asserts each layout declares the page. `lumadeck validate-all`
+  fails loudly if a future layout addition skips a page.
+* **`packages/audio.yaml`** — opt-in I²S DAC abstraction. Consumer
+  declares the `i2s_audio:` bus + `audio_dout_pin` substitution;
+  the package supplies a `lum_speaker` sink. Mirrors the
+  `display:` / `touchscreen:` split.
+* **`packages/backlight.yaml`** — wraps the common LEDC PWM →
+  monochromatic-light pattern for panel backlights. Consumer sets
+  `${backlight_pin}` (and optionally `${backlight_freq}`); package
+  supplies `output: lum_backlight` and `light: lum_backlight_light`
+  (HA-controllable, named after the device).
+* **`widgets/notification_sound.yaml`** — script-only widget exposing
+  `lum_notify_chime`. Generates a short sine-wave PCM buffer at
+  runtime and plays it through `lum_speaker`. Pairs with
+  `notification_toast`. Tunable via `${notify_freq_hz}`,
+  `${notify_duration_ms}`, `${notify_amplitude}` substitutions.
+* **`docs/displays-with-io-expander-reset.md`** — new doc covering
+  the TCA9554 / PCA9554 reset-line pattern. Includes the
+  `pca9554:`-vs-`tca9554:` naming gotcha, a worked example, and
+  the common pitfalls (inverted reset, output mode required, I²C
+  address collisions, reset timing).
+* **`examples/waveshare-1.85c.yaml` is no longer a stub.** Full
+  hardware block (ST77916 init sequence transcribed verbatim from
+  Espressif's `esp_lcd_st77916.c`, TCA9554 expander wiring, QSPI
+  bus, CST816 touch with expander reset, GPIO0 boot button, I²S
+  audio bus, USB_SERIAL_JTAG logging override). Passes
+  `esphome config` against ESPHome 2026.04 — first-light flash
+  pending. Uses the new `packages/backlight.yaml` and
+  `packages/audio.yaml`, plus the new `notification_sound` widget.
+
+`make verify` count: 3 DEVICE examples passing
+(`lilygo-t-display-amoled`, `lilygo-test-rig`, `waveshare-1.85c`),
+0 failures.
+
 ### Icons + edge swipe
 
 * `packages/fonts.yaml` now ships a documented set of 19 Material

@@ -18,7 +18,11 @@ import click
 
 from . import __version__
 from .generate import REPO_ROOT, available, generate
-from .validate import validate_path
+from .validate import (
+    collect_nav_page_refs,
+    validate_layout_against_nav,
+    validate_path,
+)
 
 
 @click.group(context_settings={"help_option_names": ["-h", "--help"]})
@@ -113,6 +117,25 @@ def validate_all() -> None:
     """Validate every file under themes/, layouts/, widgets/."""
 
     failures = 0
+
+    # Cross-check: every page id referenced by packages/nav.yaml must
+    # exist in every layout. Catches the class of bug where adding
+    # `nav_goto_<page>` to nav.yaml without updating layouts crashes
+    # consumers at config time.
+    nav_refs = collect_nav_page_refs(REPO_ROOT / "packages" / "nav.yaml")
+    if nav_refs:
+        click.echo(
+            "== nav <-> layout cross-check =="
+            f" (nav.yaml references: {sorted(nav_refs)})"
+        )
+        for layout in sorted((REPO_ROOT / "layouts").glob("*.yaml")):
+            if layout.stem.startswith("_"):
+                continue
+            result = validate_layout_against_nav(layout, nav_refs)
+            if not result.ok:
+                click.echo(result.render())
+                failures += 1
+
     for kind in ("themes", "layouts", "widgets"):
         folder = REPO_ROOT / kind
         for path in sorted(folder.glob("*.yaml")):

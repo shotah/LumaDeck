@@ -1,0 +1,40 @@
+# ---------------------------------------------------------------
+# package: audio
+# version: 0.1.0
+# Optional. Include only when your device has an I2S DAC + speaker
+# (e.g. PCM5101 on the Waveshare 1.85C BOX, MAX98357 on the
+# Sonoff NSPanel Pro, ES8311 on the M5Stack CoreS3, etc.).
+#
+# This package supplies the speaker SINK on a fixed id (`lum_speaker`)
+# so widgets like `notification_sound` can reference it by name. The
+# I2S BUS itself (with its hardware-specific pin map) lives in the
+# consumer device YAML — same split we use for `display:` /
+# `touchscreen:` / `i2c:`.
+#
+# Minimum consumer wiring:
+#
+#     i2s_audio:
+#       - id: lum_i2s
+#         i2s_lrclk_pin: GPIO38
+#         i2s_bclk_pin:  GPIO48
+#
+#     substitutions:
+#       audio_dout_pin: GPIO47
+#
+# Then `!include lumadeck/packages/audio.yaml` and you have a
+# `speaker:` with id `lum_speaker` ready to play HA TTS, chimes,
+# whatever.
+# ---------------------------------------------------------------
+
+substitutions:
+  # Mono is the safe default — most dev-board speakers are single-
+  # channel. Set `audio_channel: stereo` if your hardware has both.
+  audio_channel: "mono"
+
+speaker:
+  - platform: i2s_audio
+    id: lum_speaker
+    i2s_audio_id: lum_i2s
+    dac_type: external
+    i2s_dout_pin: ${audio_dout_pin}
+    channel: ${audio_channel}

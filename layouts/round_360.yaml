@@ -63,5 +63,7 @@ lvgl:
       bg_color: ${bg}
     - id: lights_page
       bg_color: ${bg}
+    - id: climate_page
+      bg_color: ${bg}
     - id: settings_page
       bg_color: ${bg}

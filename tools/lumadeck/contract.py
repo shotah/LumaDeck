@@ -65,7 +65,13 @@ LAYOUT_VALID_SHAPES: frozenset[str] = frozenset(
     {"round", "square", "wide", "tall"}
 )
 
-LAYOUT_REQUIRED_PAGES: tuple[str, ...] = ("home_page",)
+LAYOUT_REQUIRED_PAGES: tuple[str, ...] = (
+    "home_page",
+    "media_page",
+    "lights_page",
+    "climate_page",
+    "settings_page",
+)
 
 WIDGET_HEADER_REQUIRED_FIELDS: tuple[str, ...] = (
     "widget",

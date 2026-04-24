@@ -9,7 +9,7 @@ way of your hardware.
 [![status](https://img.shields.io/badge/status-running%20on%20real%20hardware-22c55e)]()
 [![license](https://img.shields.io/badge/license-MIT-blue)](./LICENSE)
 [![esphome](https://img.shields.io/badge/esphome-2024.6%2B-orange)]()
-[![widgets](https://img.shields.io/badge/widgets-15-3b82f6)]()
+[![widgets](https://img.shields.io/badge/widgets-16-3b82f6)]()
 
 > **Confirmed running on real hardware.** The
 > [LilyGo T-Display-S3 AMOLED](https://lilygo.cc/products/t-display-s3-amoled)
@@ -24,7 +24,7 @@ way of your hardware.
 
 | | |
 | --- | --- |
-| **15 widgets** | clock, analog_clock, status_bar, nav_tabs, media_card, album_art, weather, ring_slider, progress_ring, icon_grid, light_button, scene_button, thermostat, notification_toast, home_dashboard |
+| **16 widgets** | clock, analog_clock, status_bar, nav_tabs, media_card, album_art, weather, ring_slider, progress_ring, icon_grid, light_button, scene_button, thermostat, notification_toast, notification_sound, home_dashboard |
 | **7 layouts**  | `round_240/360`, `square_240/320`, `tall_240x320`, `tall_240x536`, `wide_480x320`, `wide_536x240` |
 | **4 themes**   | `dark`, `light`, `neon`, `high_contrast` (+ `_template`) |
 | **Material Symbols icons** | 19 documented codepoints; play/pause and mute auto-swap from HA state |
@@ -64,7 +64,7 @@ picture and recommended include order.
 | Panel | Status | Example |
 | ----- | ------ | ------- |
 | **[LilyGo T-Display-S3 AMOLED](https://lilygo.cc/products/t-display-s3-amoled)** — 1.91", 240×536 AMOLED, RM67162/QSPI, CST816 touch | ✅ flashed + working | [`examples/lilygo-t-display-amoled.yaml`](./examples/lilygo-t-display-amoled.yaml) |
-| **[Waveshare ESP32-S3-Touch-LCD-1.85C](https://www.waveshare.com/esp32-s3-touch-lcd-1.85c.htm)** — 360×360 round, capacitive touch | ⚠️ driver block stubbed | [`examples/waveshare-1.85c.yaml`](./examples/waveshare-1.85c.yaml) |
+| **[Waveshare ESP32-S3-Touch-LCD-1.85C](https://www.waveshare.com/esp32-s3-touch-lcd-1.85c.htm)** — 360×360 round, ST77916/QSPI, CST816 touch, TCA9554 expander, PCM5101 I²S DAC | ✅ passes `esphome config`, awaiting first-light flash | [`examples/waveshare-1.85c.yaml`](./examples/waveshare-1.85c.yaml) |
 
 Pin maps for the LilyGo are sourced verbatim from the upstream
 [LilyGo-AMOLED-Series](https://github.com/Xinyuan-LilyGO/LilyGo-AMOLED-Series)

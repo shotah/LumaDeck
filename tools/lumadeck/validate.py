@@ -194,6 +194,57 @@ def _walk_ids(node: object) -> list[str]:
     return found
 
 
+def collect_nav_page_refs(nav_path: Path) -> set[str]:
+    """Pull every page id referenced by `packages/nav.yaml`.
+
+    `packages/nav.yaml` defines `script:` entries that call
+    `lvgl.page.show:` against specific page ids. Every layout that
+    intends to be paired with `nav.yaml` MUST declare each of those
+    pages, or `esphome config` crashes at link time. This helper
+    returns the set of referenced ids so `validate_layout` can
+    enforce the contract.
+    """
+
+    refs: set[str] = set()
+    if not nav_path.is_file():
+        return refs
+    try:
+        data = _load(nav_path)
+    except ValueError:
+        return refs
+    for action in (data or {}).get("script", []) or []:
+        for then_action in (action or {}).get("then", []) or []:
+            page_show = (then_action or {}).get("lvgl.page.show")
+            if isinstance(page_show, str):
+                refs.add(page_show)
+            elif isinstance(page_show, dict) and "id" in page_show:
+                refs.add(page_show["id"])
+    return refs
+
+
+def validate_layout_against_nav(
+    layout_path: Path, nav_refs: set[str]
+) -> ValidationResult:
+    """Confirm a layout declares every page id `nav.yaml` references."""
+
+    result = ValidationResult(path=str(layout_path))
+    try:
+        data = _load(layout_path)
+    except ValueError as exc:
+        result.errors.append(str(exc))
+        return result
+
+    lvgl = (data or {}).get("lvgl") or {}
+    pages = lvgl.get("pages") or []
+    page_ids = {p.get("id") for p in pages if isinstance(p, dict)}
+    missing = sorted(nav_refs - page_ids)
+    for page in missing:
+        result.errors.append(
+            f"missing page {page!r} referenced by packages/nav.yaml"
+        )
+    return result
+
+
 def validate_path(path: Path) -> ValidationResult:
     """Pick the right validator based on the file's parent directory."""
 

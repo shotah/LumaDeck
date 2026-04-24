@@ -55,9 +55,11 @@ See [`widget-contract.md`](./widget-contract.md#optional-inputs-substitutions-a-
 
 ## Required pages
 
-Every layout MUST define at least the `home_page` page in its `lvgl:`
-block. Optional pages should follow this naming so widgets can target
-them consistently:
+Every layout MUST define **all five** of these pages in its `lvgl:`
+block. The list is non-negotiable because `packages/nav.yaml` ships
+hard-coded `lvgl.page.show:` references to each one — any layout
+that omits a page would crash `esphome config` the moment a consumer
+includes both that layout and `nav.yaml`.
 
 | Page id        | Purpose                              |
 | -------------- | ------------------------------------ |
@@ -66,6 +68,15 @@ them consistently:
 | `lights_page`  | Light controls                       |
 | `climate_page` | Thermostat / climate                 |
 | `settings_page`| Brightness, theme, debug             |
+
+A page with no widgets is fine — `- id: foo_page` `bg_color: ${bg}`
+is enough to satisfy the contract. Widgets attach themselves to the
+page later via `!extend`.
+
+`tools/lumadeck/validate.py` enforces this and additionally
+cross-checks every `lvgl.page.show:` reference in
+`packages/nav.yaml` against each layout. Run with `lumadeck
+validate-all`.
 
 ## Required regions (anchor ids)
 

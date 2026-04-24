@@ -1,71 +1,417 @@
 # ---------------------------------------------------------------
 # example: waveshare-1.85c
-# Reference build for the Waveshare ESP32-S3-Touch-LCD-1.85C
-# (round 360x360, capacitive touch).
+# Reference build for the Waveshare ESP32-S3-Touch-LCD-1.85C BOX
+# variant (3.7V Li battery + 4Ω 5W speaker).
 #
-# This is the closest thing to what the SEPARATE hardware repo will
-# look like. Everything above the `# ---- hardware ----` line is
-# pure LumaDeck. Everything below is panel-specific and intentionally
-# does NOT live inside the LumaDeck package.
+#   Product: https://www.waveshare.com/esp32-s3-touch-lcd-1.85c.htm
+#   Wiki:    https://www.waveshare.com/wiki/ESP32-S3-Touch-LCD-1.85C
 #
-# References:
-#   https://www.waveshare.com/esp32-s3-touch-lcd-1.85c.htm
-#   https://docs.waveshare.com/ESP32-S3-Touch-LCD-1.85C
+# Hardware highlights:
+#   * 1.85" 360x360 round AMOLED, ST77916 over QSPI
+#   * CST816 capacitive touch over I2C
+#   * TCA9554PWR I2C GPIO expander (LCD_RST=EXIO2, TP_RST=EXIO1) —
+#     see docs/displays-with-io-expander-reset.md
+#   * PCM5101 I2S DAC + 4Ω 5W speaker (BOX variant)
+#   * PCF85063 RTC, QMI8658 IMU, microphone, TF slot (not wired)
+#
+# STATUS — passes `esphome config` against ESPHome 2026.04. NOT yet
+# bring-up tested on real hardware. First-light may require flipping
+# `color_order:` (rgb/bgr) and/or `invert_colors:`. The ST77916 init
+# sequence will become obsolete the moment ESPHome ships a built-in
+# `model: ST77916` for `qspi_dbi`; track
+# https://github.com/esphome/feature-requests/issues/2803.
+#
+# Init sequence transcribed verbatim from Espressif's reference:
+#   github.com/esp-arduino-libs/ESP32_Display_Panel
+#     /blob/master/src/drivers/lcd/port/esp_lcd_st77916.c
+#   :: vendor_specific_init_default[]
 # ---------------------------------------------------------------
 
 substitutions:
   device_name:      "waveshare_round"
   device_friendly:  "Waveshare 1.85 Round"
   ha_media_player:  "media_player.living_room"
+  # Pin substitutions consumed by packages/backlight.yaml +
+  # packages/audio.yaml.
+  backlight_pin:    "GPIO5"
+  audio_dout_pin:   "GPIO47"
 
 packages:
-  core:    !include ../packages/core.yaml
-  board:   !include ../packages/board_esp32s3.yaml
-  theme:   !include ../themes/dark.yaml
-  fonts:   !include ../packages/fonts.yaml
-  colors:  !include ../packages/colors.yaml
-  display: !include ../packages/display.yaml
-  ha:      !include ../packages/ha.yaml
-  nav:     !include ../packages/nav.yaml
-  touch:   !include ../packages/touch.yaml
-  layout:  !include ../layouts/round_360.yaml
-  status:  !include ../widgets/status_bar.yaml
-  clock:   !include ../widgets/clock.yaml
-  navtabs: !include ../widgets/nav_tabs.yaml
-  media:   !include ../widgets/media_card.yaml
-  toast:   !include ../widgets/notification_toast.yaml
+  core:      !include ../packages/core.yaml
+  board:     !include ../packages/board_esp32s3.yaml
+  theme:     !include ../themes/dark.yaml
+  fonts:     !include ../packages/fonts.yaml
+  colors:    !include ../packages/colors.yaml
+  display:   !include ../packages/display.yaml
+  ha:        !include ../packages/ha.yaml
+  nav:       !include ../packages/nav.yaml
+  touch:     !include ../packages/touch.yaml
+  backlight: !include ../packages/backlight.yaml
+  audio:     !include ../packages/audio.yaml
+  layout:    !include ../layouts/round_360.yaml
+  status:    !include ../widgets/status_bar.yaml
+  clock:     !include ../widgets/clock.yaml
+  navtabs:   !include ../widgets/nav_tabs.yaml
+  media:     !include ../widgets/media_card.yaml
+  toast:     !include ../widgets/notification_toast.yaml
+  chime:     !include ../widgets/notification_sound.yaml
 
-# ---- hardware (lives in consumer repo, not in LumaDeck) ----
-# The 1.85" round panel uses an ST77916 driver over QSPI and a CST816
-# capacitive touch controller over I2C. ESPHome support for these
-# specific ICs evolves; check the LumaDeck "consumer repo guide" for
-# the current recommended driver block.
-#
-# i2c:
-#   - id: bus_a
-#     sda: GPIO11
-#     scl: GPIO10
-#
-# touchscreen:
-#   - platform: cst816
-#     id: lum_touchscreen
-#     i2c_id: bus_a
-#     interrupt_pin: GPIO4
-#     reset_pin: GPIO5
-#
-# spi:
-#   - id: lcd_spi
-#     type: quad
-#     clk_pin: GPIO40
-#     data_pins: [GPIO46, GPIO45, GPIO42, GPIO41]
-#
-# display:
-#   - platform: <st77916-driver-when-available>
-#     id: lum_display
-#     spi_id: lcd_spi
-#     cs_pin: GPIO21
-#     reset_pin: GPIO39
-#     dimensions:
-#       width: 360
-#       height: 360
-#     auto_clear_enabled: false
+# ---- hardware (lives in the consumer repo, not in LumaDeck) ----
+
+esp32:
+  board: esp32-s3-devkitc-1
+  flash_size: 16MB
+  framework:
+    type: esp-idf
+  variant: ESP32S3
+
+# The Waveshare 1.85C wires its USB-C port directly to the ESP32-S3's
+# built-in USB-Serial/JTAG peripheral (GPIO19/20) — there's NO
+# CH340/CP2102 bridge. Default ESPHome logging targets UART0
+# (GPIO43/44, side header only), which means nothing reaches the
+# USB-C cable. Override the logger to route over the JTAG/CDC device.
+logger:
+  hardware_uart: USB_SERIAL_JTAG
+  level: ${log_level}
+
+# 8MB octal PSRAM — required for the 360x360 LVGL framebuffer.
+psram:
+  mode: octal
+  speed: 80MHz
+
+# Single I2C bus shared by the TCA9554 expander, CST816 touch,
+# PCF85063 RTC, and any future expander-side peripherals.
+i2c:
+  - id: bus_a
+    sda: GPIO11
+    scl: GPIO10
+    frequency: 400kHz
+    scan: true
+
+# TCA9554PWR GPIO expander. Drives panel reset (EXIO2) and touch
+# reset (EXIO1). See docs/displays-with-io-expander-reset.md for
+# why this is `pca9554:` even though the chip is a TCA9554.
+pca9554:
+  - id: lum_io_expander
+    address: 0x20
+    i2c_id: bus_a
+
+# QSPI bus for the ST77916 AMOLED.
+spi:
+  - id: lcd_qspi
+    type: quad
+    clk_pin: GPIO40
+    data_pins:
+      - GPIO46    # D0 / SDA0
+      - GPIO45    # D1 / SDA1
+      - GPIO42    # D2 / SDA2
+      - GPIO41    # D3 / SDA3
+
+display:
+  - platform: qspi_dbi
+    id: lum_display
+    model: CUSTOM
+    spi_id: lcd_qspi
+    cs_pin: GPIO21
+    # LCD_RST is on EXIO2 of the TCA9554, not a real GPIO.
+    reset_pin:
+      pca9554: lum_io_expander
+      number: 2
+      mode:
+        output: true
+      inverted: true
+    dimensions:
+      width: 360
+      height: 360
+    color_order: bgr
+    invert_colors: false
+    auto_clear_enabled: false
+    update_interval: never
+    # Vendor-specific init sequence for ST77916 — transcribed from
+    # esp_lcd_st77916.c::vendor_specific_init_default[]. Each
+    # `- [CMD, ...DATA]` corresponds to one `tx_param()`; non-zero
+    # `delay_ms` entries become a `- delay <n>ms` line directly
+    # after the command, matching the C driver's vTaskDelay().
+    init_sequence:
+      - [0xF0, 0x08]
+      - [0xF2, 0x08]
+      - [0x9B, 0x51]
+      - [0x86, 0x53]
+      - [0xF2, 0x80]
+      - [0xF0, 0x00]
+      - [0xF0, 0x01]
+      - [0xF1, 0x01]
+      - [0xB0, 0x54]
+      - [0xB1, 0x3F]
+      - [0xB2, 0x2A]
+      - [0xB4, 0x46]
+      - [0xB5, 0x34]
+      - [0xB6, 0xD5]
+      - [0xB7, 0x30]
+      - [0xB8, 0x04]
+      - [0xBA, 0x00]
+      - [0xBB, 0x08]
+      - [0xBC, 0x08]
+      - [0xBD, 0x00]
+      - [0xC0, 0x80]
+      - [0xC1, 0x10]
+      - [0xC2, 0x37]
+      - [0xC3, 0x80]
+      - [0xC4, 0x10]
+      - [0xC5, 0x37]
+      - [0xC6, 0xA9]
+      - [0xC7, 0x41]
+      - [0xC8, 0x51]
+      - [0xC9, 0xA9]
+      - [0xCA, 0x41]
+      - [0xCB, 0x51]
+      - [0xD0, 0x91]
+      - [0xD1, 0x68]
+      - [0xD2, 0x69]
+      - [0xF5, 0x00, 0xA5]
+      - [0xDD, 0x35]
+      - [0xDE, 0x35]
+      - [0xF1, 0x10]
+      - [0xF0, 0x00]
+      - [0xF0, 0x02]
+      - [0xE0, 0x70, 0x09, 0x12, 0x0C, 0x0B, 0x27, 0x38, 0x54, 0x4E, 0x19, 0x15, 0x15, 0x2C, 0x2F]
+      - [0xE1, 0x70, 0x08, 0x11, 0x0C, 0x0B, 0x27, 0x38, 0x43, 0x4C, 0x18, 0x14, 0x14, 0x2B, 0x2D]
+      - [0xF0, 0x10]
+      - [0xF3, 0x10]
+      - [0xE0, 0x0A]
+      - [0xE1, 0x00]
+      - [0xE2, 0x0B]
+      - [0xE3, 0x00]
+      - [0xE4, 0xE0]
+      - [0xE5, 0x06]
+      - [0xE6, 0x21]
+      - [0xE7, 0x00]
+      - [0xE8, 0x05]
+      - [0xE9, 0x82]
+      - [0xEA, 0xDF]
+      - [0xEB, 0x89]
+      - [0xEC, 0x20]
+      - [0xED, 0x14]
+      - [0xEE, 0xFF]
+      - [0xEF, 0x00]
+      - [0xF8, 0xFF]
+      - [0xF9, 0x00]
+      - [0xFA, 0x00]
+      - [0xFB, 0x30]
+      - [0xFC, 0x00]
+      - [0xFD, 0x00]
+      - [0xFE, 0x00]
+      - [0xFF, 0x00]
+      - [0x60, 0x42]
+      - [0x61, 0xE0]
+      - [0x62, 0x40]
+      - [0x63, 0x40]
+      - [0x64, 0x02]
+      - [0x65, 0x00]
+      - [0x66, 0x40]
+      - [0x67, 0x03]
+      - [0x68, 0x00]
+      - [0x69, 0x00]
+      - [0x6A, 0x00]
+      - [0x6B, 0x00]
+      - [0x70, 0x42]
+      - [0x71, 0xE0]
+      - [0x72, 0x40]
+      - [0x73, 0x40]
+      - [0x74, 0x02]
+      - [0x75, 0x00]
+      - [0x76, 0x40]
+      - [0x77, 0x03]
+      - [0x78, 0x00]
+      - [0x79, 0x00]
+      - [0x7A, 0x00]
+      - [0x7B, 0x00]
+      - [0x80, 0x38]
+      - [0x81, 0x00]
+      - [0x82, 0x04]
+      - [0x83, 0x02]
+      - [0x84, 0xDC]
+      - [0x85, 0x00]
+      - [0x86, 0x00]
+      - [0x87, 0x00]
+      - [0x88, 0x38]
+      - [0x89, 0x00]
+      - [0x8A, 0x06]
+      - [0x8B, 0x02]
+      - [0x8C, 0xDE]
+      - [0x8D, 0x00]
+      - [0x8E, 0x00]
+      - [0x8F, 0x00]
+      - [0x90, 0x38]
+      - [0x91, 0x00]
+      - [0x92, 0x08]
+      - [0x93, 0x02]
+      - [0x94, 0xE0]
+      - [0x95, 0x00]
+      - [0x96, 0x00]
+      - [0x97, 0x00]
+      - [0x98, 0x38]
+      - [0x99, 0x00]
+      - [0x9A, 0x0A]
+      - [0x9B, 0x02]
+      - [0x9C, 0xE2]
+      - [0x9D, 0x00]
+      - [0x9E, 0x00]
+      - [0x9F, 0x00]
+      - [0xA0, 0x38]
+      - [0xA1, 0x00]
+      - [0xA2, 0x03]
+      - [0xA3, 0x02]
+      - [0xA4, 0xDB]
+      - [0xA5, 0x00]
+      - [0xA6, 0x00]
+      - [0xA7, 0x00]
+      - [0xA8, 0x38]
+      - [0xA9, 0x00]
+      - [0xAA, 0x05]
+      - [0xAB, 0x02]
+      - [0xAC, 0xDD]
+      - [0xAD, 0x00]
+      - [0xAE, 0x00]
+      - [0xAF, 0x00]
+      - [0xB0, 0x38]
+      - [0xB1, 0x00]
+      - [0xB2, 0x07]
+      - [0xB3, 0x02]
+      - [0xB4, 0xDF]
+      - [0xB5, 0x00]
+      - [0xB6, 0x00]
+      - [0xB7, 0x00]
+      - [0xB8, 0x38]
+      - [0xB9, 0x00]
+      - [0xBA, 0x09]
+      - [0xBB, 0x02]
+      - [0xBC, 0xE1]
+      - [0xBD, 0x00]
+      - [0xBE, 0x00]
+      - [0xBF, 0x00]
+      - [0xC0, 0x22]
+      - [0xC1, 0xAA]
+      - [0xC2, 0x65]
+      - [0xC3, 0x74]
+      - [0xC4, 0x47]
+      - [0xC5, 0x56]
+      - [0xC6, 0x00]
+      - [0xC7, 0x88]
+      - [0xC8, 0x99]
+      - [0xC9, 0x33]
+      - [0xD0, 0x11]
+      - [0xD1, 0xAA]
+      - [0xD2, 0x65]
+      - [0xD3, 0x74]
+      - [0xD4, 0x47]
+      - [0xD5, 0x56]
+      - [0xD6, 0x00]
+      - [0xD7, 0x88]
+      - [0xD8, 0x99]
+      - [0xD9, 0x33]
+      - [0xF3, 0x01]
+      - [0xF0, 0x00]
+      - [0xF0, 0x01]
+      - [0xF1, 0x01]
+      - [0xA0, 0x0B]
+      - [0xA3, 0x2A]
+      - [0xA5, 0xC3]
+      - delay 1ms
+      - [0xA3, 0x2B]
+      - [0xA5, 0xC3]
+      - delay 1ms
+      - [0xA3, 0x2C]
+      - [0xA5, 0xC3]
+      - delay 1ms
+      - [0xA3, 0x2D]
+      - [0xA5, 0xC3]
+      - delay 1ms
+      - [0xA3, 0x2E]
+      - [0xA5, 0xC3]
+      - delay 1ms
+      - [0xA3, 0x2F]
+      - [0xA5, 0xC3]
+      - delay 1ms
+      - [0xA3, 0x30]
+      - [0xA5, 0xC3]
+      - delay 1ms
+      - [0xA3, 0x31]
+      - [0xA5, 0xC3]
+      - delay 1ms
+      - [0xA3, 0x32]
+      - [0xA5, 0xC3]
+      - delay 1ms
+      - [0xA3, 0x33]
+      - [0xA5, 0xC3]
+      - delay 1ms
+      - [0xA0, 0x09]
+      - [0xF1, 0x10]
+      - [0xF0, 0x00]
+      - [0x2A, 0x00, 0x00, 0x01, 0x67]
+      - [0x2B, 0x01, 0x68, 0x01, 0x68]
+      - [0x4D, 0x00]
+      - [0x4E, 0x00]
+      - [0x4F, 0x00]
+      - [0x4C, 0x01]
+      - delay 10ms
+      - [0x4C, 0x00]
+      - [0x2A, 0x00, 0x00, 0x01, 0x67]
+      - [0x2B, 0x00, 0x00, 0x01, 0x67]
+      - [0x21]
+      - [0x11]
+      - delay 120ms
+      - [0x29]
+
+# Bind the display to LVGL. The 360x360 panel is square so no
+# rotation is needed (round_360 layout assumes this orientation).
+lvgl:
+  displays:
+    - lum_display
+
+touchscreen:
+  - platform: cst816
+    id: lum_touchscreen
+    i2c_id: bus_a
+    interrupt_pin: GPIO4
+    # TP_RST is also on the TCA9554 (EXIO1).
+    reset_pin:
+      pca9554: lum_io_expander
+      number: 1
+      mode:
+        output: true
+      inverted: true
+    on_touch:
+      - script.execute:
+          id: lum_touch_press
+          x: !lambda 'return touch.x;'
+          y: !lambda 'return touch.y;'
+    on_update:
+      - if:
+          condition:
+            lambda: 'return !touches.empty();'
+          then:
+            - script.execute:
+                id: lum_touch_update
+                x: !lambda 'return touches[0].x;'
+                y: !lambda 'return touches[0].y;'
+    on_release:
+      - script.execute: lum_touch_release
+
+# Boot button doubles as manual page-cycle, matching the LilyGo build.
+binary_sensor:
+  - platform: gpio
+    id: lum_boot_btn
+    pin:
+      number: GPIO0
+      mode: INPUT_PULLUP
+      inverted: true
+    on_press:
+      - script.execute: nav_next_page
+
+# I2S audio bus (PCM5101 DAC). The `speaker:` sink is supplied by
+# packages/audio.yaml; we just declare the bus + pins here.
+i2s_audio:
+  - id: lum_i2s
+    i2s_lrclk_pin: GPIO38
+    i2s_bclk_pin: GPIO48

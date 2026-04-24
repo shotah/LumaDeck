@@ -1,0 +1,43 @@
+# ---------------------------------------------------------------
+# package: backlight
+# version: 0.1.0
+# Optional. Wires the panel backlight to a LEDC PWM output and
+# exposes it as an ESPHome `light:` so HA can control brightness
+# (and a future `widgets/backlight_slider.yaml` can target it
+# locally).
+#
+# Most QSPI / AMOLED dev boards expose the backlight (or `EN_VCI`
+# enable line) on a regular GPIO. Set `${backlight_pin}` in your
+# device YAML to the right pin and include this package:
+#
+#     substitutions:
+#       backlight_pin: GPIO5
+#
+#     packages:
+#       backlight: !include lumadeck/packages/backlight.yaml
+#
+# Exposes:
+#   * `output: lum_backlight`        — raw PWM output
+#   * `light:  lum_backlight_light`  — HA-controllable brightness
+#                                       (name: "<device> Backlight")
+# ---------------------------------------------------------------
+
+substitutions:
+  # PWM frequency in Hz. 5 kHz is well above the audible range and
+  # safe for nearly every backlight driver. Bump higher if you see
+  # visible flicker with your panel.
+  backlight_freq: "5000Hz"
+
+output:
+  - platform: ledc
+    id: lum_backlight
+    pin: ${backlight_pin}
+    frequency: ${backlight_freq}
+
+light:
+  - platform: monochromatic
+    id: lum_backlight_light
+    name: "${device_friendly} Backlight"
+    output: lum_backlight
+    restore_mode: ALWAYS_ON
+    default_transition_length: 0s

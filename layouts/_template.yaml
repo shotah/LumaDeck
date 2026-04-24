@@ -53,3 +53,16 @@ lvgl:
             height: ${screen_h}
             bg_opa: TRANSP
             border_width: 0
+
+    # All four extra pages MUST be declared so consumers can include
+    # `packages/nav.yaml` (which references each by id) without a
+    # config-time error. Trim only if you're sure you'll never use
+    # `nav.yaml` with this layout.
+    - id: media_page
+      bg_color: ${bg}
+    - id: lights_page
+      bg_color: ${bg}
+    - id: climate_page
+      bg_color: ${bg}
+    - id: settings_page
+      bg_color: ${bg}
